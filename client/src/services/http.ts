@@ -18,6 +18,19 @@ interface ErrorBody {
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+type UnauthorizedListener = (path: string) => void;
+const unauthorizedListeners = new Set<UnauthorizedListener>();
+
+/**
+ * Observer hook for session expiry: the auth store subscribes so that any 401 from an
+ * instructor endpoint clears the cached session and redirects to /login. Examinee (token)
+ * endpoints never return 401, so this cannot disturb an exam in progress.
+ */
+export function onUnauthorized(listener: UnauthorizedListener): () => void {
+  unauthorizedListeners.add(listener);
+  return () => unauthorizedListeners.delete(listener);
+}
+
 interface RequestOptions {
   body?: unknown;
   signal?: AbortSignal;
@@ -42,6 +55,7 @@ async function request<T>(method: Method, path: string, { body, signal }: Reques
 
   if (!res.ok) {
     const err = (data as ErrorBody | null)?.error;
+    if (res.status === 401 && !path.startsWith('/auth/')) unauthorizedListeners.forEach((l) => l(path));
     throw new HttpError(res.status, err?.code ?? 'HTTP_ERROR', err?.message ?? res.statusText, err?.details);
   }
   return data as T;

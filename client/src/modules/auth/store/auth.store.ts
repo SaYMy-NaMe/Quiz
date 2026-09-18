@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { Credentials, Instructor, RegisterPayload } from '@shared';
 import { authApi } from '../services/auth.api';
-import { HttpError } from '@/services/http';
+import { HttpError, onUnauthorized } from '@/services/http';
 import { sessionStore } from '@/services/storage';
 
 type Status = 'idle' | 'loading' | 'authenticated' | 'anonymous';
@@ -13,6 +13,8 @@ interface AuthState {
   login: (payload: Credentials) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
+  /** Drops the local session after the server rejected it (expired / revoked). */
+  expire: () => void;
 }
 
 const CACHE_KEY = 'auth:instructor';
@@ -59,4 +61,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     sessionStore.remove(CACHE_KEY);
     set({ status: 'anonymous', instructor: null });
   },
+
+  expire() {
+    sessionStore.remove(CACHE_KEY);
+    set({ status: 'anonymous', instructor: null });
+  },
 }));
+
+onUnauthorized(() => {
+  if (useAuthStore.getState().status === 'authenticated') useAuthStore.getState().expire();
+});
