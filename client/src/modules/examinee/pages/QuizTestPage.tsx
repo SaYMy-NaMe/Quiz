@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, useLoaderData } from 'react-router-dom';
 import type { ShareLoaderData } from '@/router/share-loader';
 import { WizardSteps } from '../components/WizardSteps';
@@ -8,6 +8,7 @@ import { useAttemptStore } from '@/modules/quiz/store/attempt.store';
 import { useAttemptRuntime, examineePaths } from '../hooks/useAttemptRuntime';
 import { Spinner } from '@/components/Spinner';
 import { Modal } from '@/components/Modal';
+import { useProctor, ProctorOverlays } from '@/modules/proctor';
 
 export function Component() {
   const { quiz, token, invite } = useLoaderData() as ShareLoaderData;
@@ -16,6 +17,8 @@ export function Component() {
   const answers = useAttemptStore((s) => s.answers);
   const answer = useAttemptStore((s) => s.answer);
   const [confirm, setConfirm] = useState(false);
+  const onThreshold = useCallback(() => void submit('violation'), [submit]);
+  const proctor = useProctor({ token, invite, active: phase === 'ready', onThresholdReached: onThreshold });
 
   if (phase === 'loading') return <Spinner label="Restoring your attempt…" fullscreen />;
   if (phase === 'missing') {
@@ -68,6 +71,14 @@ export function Component() {
           <button className="btn btn--primary btn--lg" onClick={() => setConfirm(true)} disabled={submitting}>Submit answers</button>
         </div>
       </main>
+      <ProctorOverlays
+        warning={proctor.warning}
+        onDismiss={proctor.dismissWarning}
+        fullscreen={proctor.fullscreen}
+        onEnterFullscreen={() => void proctor.enterFullscreen()}
+        softNotice={proctor.softNotice}
+        submitting={submitting}
+      />
       {confirm && (
         <Modal title="Submit your answers?" onClose={() => setConfirm(false)}>
           <p>
