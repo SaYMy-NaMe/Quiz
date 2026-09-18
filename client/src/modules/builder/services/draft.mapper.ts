@@ -4,7 +4,7 @@ import type { DraftOption, DraftQuestion, DraftSchemaField, Quiz, QuizDraft, Qui
 /** Factory for blank editor entities (mirrors the server-side QuestionFactory). */
 export const DraftFactory = {
   option(text = ''): DraftOption {
-    return { key: nextKey('opt'), text };
+    return { key: nextKey('opt'), text, imageUrl: null };
   },
   question(): DraftQuestion {
     const options = [DraftFactory.option(), DraftFactory.option()];
@@ -25,7 +25,7 @@ export const DraftFactory = {
     return {
       title: '',
       description: '',
-      settings: { durationSeconds: 600, revealAnswers: false, leaderboardVisible: true, accessMode: 'public' },
+      settings: { durationSeconds: 600, revealScores: true, revealAnswers: false, leaderboardVisible: true, accessMode: 'public' },
       examineeFields: [],
       questions: [DraftFactory.question()],
     };
@@ -38,6 +38,7 @@ export function quizToDraft(quiz: Quiz): QuizDraft {
     description: quiz.description,
     settings: {
       durationSeconds: quiz.durationSeconds,
+      revealScores: quiz.revealScores,
       revealAnswers: quiz.revealAnswers,
       leaderboardVisible: quiz.leaderboardVisible,
       accessMode: quiz.accessMode,
@@ -52,7 +53,7 @@ export function quizToDraft(quiz: Quiz): QuizDraft {
       placeholder: f.placeholder ?? '',
     })),
     questions: quiz.questions.map((q) => {
-      const options = q.options.map((o) => ({ key: nextKey('opt'), id: o.id, text: o.text }));
+      const options = q.options.map((o) => ({ key: nextKey('opt'), id: o.id, text: o.text, imageUrl: o.imageUrl ?? null }));
       const correct = options.find((o) => o.id === q.correctOptionId) ?? options[0]!;
       return {
         key: nextKey('q'),
@@ -86,7 +87,7 @@ export function draftToPayload(draft: QuizDraft): QuizUpsertPayload {
       prompt: q.prompt,
       promptType: q.promptType,
       imageUrl: q.promptType === 'image' ? q.imageUrl : null,
-      options: q.options.map((o) => ({ ...(o.id ? { id: o.id } : {}), text: o.text })),
+      options: q.options.map((o) => ({ ...(o.id ? { id: o.id } : {}), text: o.text.trim(), imageUrl: o.imageUrl })),
       correctIndex: Math.max(
         0,
         q.options.findIndex((o) => o.key === q.correctKey),

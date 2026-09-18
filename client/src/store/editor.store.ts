@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { MAX_OPTIONS, MIN_OPTIONS } from '@shared';
-import type { DraftQuestion, DraftSchemaField, Quiz, QuizDraft } from '@/types';
+import type { DraftOption, DraftQuestion, DraftSchemaField, Quiz, QuizDraft } from '@/types';
 import { DraftFactory, quizToDraft } from '@/modules/builder/services/draft.mapper';
 
 /**
@@ -22,7 +22,7 @@ interface EditorState {
   updateQuestion: (key: string, patch: Partial<Omit<DraftQuestion, 'key' | 'options'>>) => void;
   addOption: (questionKey: string) => void;
   removeOption: (questionKey: string, optionKey: string) => void;
-  updateOption: (questionKey: string, optionKey: string, text: string) => void;
+  updateOption: (questionKey: string, optionKey: string, patch: Partial<Pick<DraftOption, 'text' | 'imageUrl'>>) => void;
   setCorrect: (questionKey: string, optionKey: string) => void;
   addField: () => void;
   removeField: (key: string) => void;
@@ -78,8 +78,8 @@ export const useEditorStore = create<EditorState>((set) => {
         const options = q.options.filter((o) => o.key !== ok);
         return { ...q, options, correctKey: q.correctKey === ok ? options[0]!.key : q.correctKey };
       }),
-    updateOption: (qk, ok, text) =>
-      patchQuestion(qk, (q) => ({ ...q, options: q.options.map((o) => (o.key === ok ? { ...o, text } : o)) })),
+    updateOption: (qk, ok, patch) =>
+      patchQuestion(qk, (q) => ({ ...q, options: q.options.map((o) => (o.key === ok ? { ...o, ...patch } : o)) })),
     setCorrect: (qk, ok) => patchQuestion(qk, (q) => ({ ...q, correctKey: ok })),
 
     addField: () =>

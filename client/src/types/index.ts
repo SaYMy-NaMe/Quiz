@@ -26,6 +26,7 @@ export interface DraftOption {
   key: string;
   id?: string;
   text: string;
+  imageUrl: string | null;
 }
 
 export interface DraftQuestion {
@@ -54,6 +55,7 @@ export interface QuizDraft {
   description: string;
   settings: {
     durationSeconds: number;
+    revealScores: boolean;
     revealAnswers: boolean;
     leaderboardVisible: boolean;
     accessMode: 'public' | 'restricted';
@@ -80,7 +82,7 @@ export interface QuizUpsertPayload {
     prompt: string;
     promptType: 'text' | 'image';
     imageUrl?: string | null;
-    options: { id?: string; text: string }[];
+    options: { id?: string; text: string; imageUrl?: string | null }[];
     correctIndex: number;
     points: number;
   }[];

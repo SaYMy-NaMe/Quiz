@@ -27,8 +27,8 @@ describe('editor store', () => {
   it('maps drafts to the wire payload with correctIndex and back from a quiz', () => {
     state().setMeta({ title: 'Mapped' });
     const q = state().draft.questions[0]!;
-    state().updateOption(q.key, q.options[0]!.key, 'A');
-    state().updateOption(q.key, q.options[1]!.key, 'B');
+    state().updateOption(q.key, q.options[0]!.key, { text: 'A' });
+    state().updateOption(q.key, q.options[1]!.key, { text: 'B', imageUrl: '/uploads/b.png' });
     state().updateQuestion(q.key, { prompt: 'Pick' });
     state().setCorrect(q.key, q.options[1]!.key);
     state().addField();
@@ -36,12 +36,12 @@ describe('editor store', () => {
     state().updateField(f.key, { fieldId: 'section', label: 'Section', type: 'select', options: ['A', '', 'B'] });
 
     const payload = draftToPayload(state().draft);
-    expect(payload.questions[0]).toMatchObject({ prompt: 'Pick', correctIndex: 1, options: [{ text: 'A' }, { text: 'B' }] });
+    expect(payload.questions[0]).toMatchObject({ prompt: 'Pick', correctIndex: 1, options: [{ text: 'A', imageUrl: null }, { text: 'B', imageUrl: '/uploads/b.png' }] });
     expect(payload.examineeFields[0]).toEqual({ fieldId: 'section', label: 'Section', type: 'select', required: true, options: ['A', 'B'] });
 
     const quiz: Quiz = {
       id: 'q', ownerId: 'o', title: 'Mapped', description: '', status: 'draft', shareToken: null, durationSeconds: 600,
-      revealAnswers: false, leaderboardVisible: true, accessMode: 'public',
+      revealScores: true, revealAnswers: false, leaderboardVisible: true, accessMode: 'public',
       examineeFields: [{ fieldId: 'section', label: 'Section', type: 'select', required: true, options: ['A', 'B'] }],
       questions: [{ id: 'q1', prompt: 'Pick', promptType: 'text', options: [{ id: 'o1', text: 'A' }, { id: 'o2', text: 'B' }], correctOptionId: 'o2', points: 1 }],
       createdAt: '', updatedAt: '',

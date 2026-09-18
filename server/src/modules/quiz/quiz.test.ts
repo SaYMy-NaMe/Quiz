@@ -16,6 +16,7 @@ const baseQuiz = (): Quiz => ({
   shareToken: null,
   durationSeconds: 60,
   revealAnswers: false,
+  revealScores: true,
   leaderboardVisible: true,
   accessMode: 'public',
   examineeFields: [],
@@ -110,5 +111,37 @@ describe('quiz API', () => {
   it('validates option count', async () => {
     const res = await agent.post('/api/quizzes').send({ ...payload, questions: [{ prompt: 'x', options: [{ text: 'a' }], correctIndex: 0 }] });
     expect(res.status).toBe(400);
+  });
+});
+
+describe('choice images and reveal toggles', () => {
+  it('accepts image-only options and rejects empty ones', () => {
+    const q = QuestionFactory.create({ prompt: 'x', promptType: 'text', options: [{ text: '', imageUrl: '/uploads/a.png' }, { text: 'b' }], correctIndex: 0 });
+    expect(q.options[0]).toEqual({ id: expect.any(String), text: '', imageUrl: '/uploads/a.png' });
+    expect(() => QuestionFactory.create({ prompt: 'x', promptType: 'text', options: [{ text: '' }, { text: 'b' }], correctIndex: 0 })).toThrow(/text or an image/);
+  });
+
+  it('hides the score from the receipt when revealScores is off (unless the key is revealed)', async () => {
+    const app = createApp(createContainer({ db: openDatabase(':memory:') }));
+    const agent = request.agent(app);
+    await agent.post('/api/auth/register').send({ name: 'A', email: 'a@x.io', password: 'password123' });
+    const run = async (settings: Record<string, boolean>) => {
+      const created = await agent.post('/api/quizzes').send({
+        title: 'R', settings, questions: [{ prompt: 'a', options: [{ text: '1' }, { text: '2' }], correctIndex: 0 }],
+      });
+      const pub = await agent.post(`/api/quizzes/${created.body.quiz.id}/publish`);
+      const started = await request(app).post(`/api/share/${pub.body.quiz.shareToken}/attempts`).send({ examinee: {} });
+      const sub = await request(app).post(`/api/share/${pub.body.quiz.shareToken}/attempts/${started.body.attempt.id}/submit`).send({ answers: {} });
+      return sub.body.receipt as { score: number | null; maxScore: number | null; breakdown?: unknown[] };
+    };
+    const hidden = await run({ revealScores: false, revealAnswers: false });
+    expect(hidden.score).toBeNull();
+    expect(hidden.maxScore).toBeNull();
+    expect(hidden.breakdown).toBeUndefined();
+    const shown = await run({ revealScores: true, revealAnswers: false });
+    expect(shown.score).toBe(0);
+    const keyed = await run({ revealScores: false, revealAnswers: true });
+    expect(keyed.score).toBe(0);
+    expect(keyed.breakdown).toHaveLength(1);
   });
 });

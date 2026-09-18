@@ -29,10 +29,11 @@ interface Deps {
 
 export function createSubmissionService({ db, repo, grading, events }: Deps): SubmissionService {
   const toReceipt = (quiz: Quiz, s: Submission): SubmissionReceipt => {
+    const showScore = quiz.revealScores || quiz.revealAnswers;
     const receipt: SubmissionReceipt = {
       submissionId: s.id,
-      score: s.score,
-      maxScore: s.maxScore,
+      score: showScore ? s.score : null,
+      maxScore: showScore ? s.maxScore : null,
       durationSeconds: s.durationSeconds,
       submittedAt: s.submittedAt,
       reason: s.reason,

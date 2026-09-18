@@ -12,6 +12,7 @@ interface QuizRow {
   share_token: string | null;
   duration_seconds: number;
   reveal_answers: number;
+  reveal_scores: number;
   leaderboard_visible: number;
   examinee_fields: string;
   questions: string;
@@ -34,6 +35,7 @@ const toQuiz = (row: QuizRow): Quiz => ({
   shareToken: row.share_token,
   durationSeconds: row.duration_seconds,
   revealAnswers: row.reveal_answers === 1,
+  revealScores: row.reveal_scores === 1,
   leaderboardVisible: row.leaderboard_visible === 1,
   examineeFields: parseJson<SchemaField[]>(row.examinee_fields, []),
   questions: parseJson<Question[]>(row.questions, []),
@@ -90,8 +92,8 @@ export function createQuizRepository(db: Db): QuizRepository {
     insert(q) {
       db.prepare(
         `INSERT INTO quizzes (id, owner_id, title, description, status, access_mode, share_token, duration_seconds,
-          reveal_answers, leaderboard_visible, examinee_fields, questions, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          reveal_answers, reveal_scores, leaderboard_visible, examinee_fields, questions, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       ).run(
         q.id,
         q.ownerId,
@@ -102,6 +104,7 @@ export function createQuizRepository(db: Db): QuizRepository {
         q.shareToken,
         q.durationSeconds,
         q.revealAnswers ? 1 : 0,
+        q.revealScores ? 1 : 0,
         q.leaderboardVisible ? 1 : 0,
         JSON.stringify(q.examineeFields),
         JSON.stringify(q.questions),
@@ -112,7 +115,7 @@ export function createQuizRepository(db: Db): QuizRepository {
     update(q) {
       db.prepare(
         `UPDATE quizzes SET title = ?, description = ?, status = ?, access_mode = ?, share_token = ?,
-          duration_seconds = ?, reveal_answers = ?, leaderboard_visible = ?, examinee_fields = ?, questions = ?,
+          duration_seconds = ?, reveal_answers = ?, reveal_scores = ?, leaderboard_visible = ?, examinee_fields = ?, questions = ?,
           updated_at = ? WHERE id = ?`,
       ).run(
         q.title,
@@ -122,6 +125,7 @@ export function createQuizRepository(db: Db): QuizRepository {
         q.shareToken,
         q.durationSeconds,
         q.revealAnswers ? 1 : 0,
+        q.revealScores ? 1 : 0,
         q.leaderboardVisible ? 1 : 0,
         JSON.stringify(q.examineeFields),
         JSON.stringify(q.questions),

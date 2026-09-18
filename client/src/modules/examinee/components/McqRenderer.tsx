@@ -38,7 +38,8 @@ export function McqRenderer({ question, index, selected, onSelect, result }: Pro
           return (
             <label key={o.id} className={cls}>
               <input type="radio" name={`q-${question.id}`} value={o.id} checked={isSelected} disabled={review} onChange={() => onSelect?.(o.id)} />
-              <span>{o.text}</span>
+              {o.imageUrl && <img src={o.imageUrl} alt={o.text || 'Choice image'} className="option__image" loading="lazy" decoding="async" />}
+              {o.text && <span>{o.text}</span>}
             </label>
           );
         })}

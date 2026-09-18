@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS quizzes (
   share_token TEXT UNIQUE,
   duration_seconds INTEGER NOT NULL DEFAULT 600,
   reveal_answers INTEGER NOT NULL DEFAULT 0,
+  reveal_scores INTEGER NOT NULL DEFAULT 1,
   leaderboard_visible INTEGER NOT NULL DEFAULT 1,
   examinee_fields TEXT NOT NULL DEFAULT '[]',
   questions TEXT NOT NULL DEFAULT '[]',
@@ -98,7 +99,16 @@ export function openDatabase(dbPath: string = env.DATABASE_PATH): Db {
   db.exec('PRAGMA journal_mode = WAL;');
   db.exec('PRAGMA foreign_keys = ON;');
   db.exec(SCHEMA);
+  migrate(db);
   return db;
+}
+
+/** Additive, idempotent column migrations for databases created by earlier versions. */
+function migrate(db: Db): void {
+  const columns = new Set((db.prepare('PRAGMA table_info(quizzes)').all() as { name: string }[]).map((c) => c.name));
+  if (!columns.has('reveal_scores')) {
+    db.exec('ALTER TABLE quizzes ADD COLUMN reveal_scores INTEGER NOT NULL DEFAULT 1;');
+  }
 }
 
 /** Runs `fn` inside a transaction, rolling back on throw. */

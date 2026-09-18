@@ -25,11 +25,20 @@ export function QuizSettingsForm({ errors = {} }: { errors?: Record<string, stri
       </div>
 
       <label className="switch">
-        <input type="checkbox" checked={settings.revealAnswers} onChange={(e) => setSettings({ revealAnswers: e.target.checked })} />
+        <input type="checkbox" checked={settings.revealScores} onChange={(e) => setSettings({ revealScores: e.target.checked, ...(e.target.checked ? {} : { revealAnswers: false }) })} />
+        <span>
+          <strong>Reveal score after submission</strong>
+          <br />
+          <span className="muted small">Examinees see their score on the result page. Off = a plain "submitted" confirmation.</span>
+        </span>
+      </label>
+
+      <label className="switch">
+        <input type="checkbox" checked={settings.revealAnswers} onChange={(e) => setSettings({ revealAnswers: e.target.checked, ...(e.target.checked ? { revealScores: true } : {}) })} />
         <span>
           <strong>Reveal answer key after submission</strong>
           <br />
-          <span className="muted small">Examinees see which options were correct on their result page.</span>
+          <span className="muted small">Examinees see which options were correct (implies the score is shown). The key is never sent to the browser before submission.</span>
         </span>
       </label>
 

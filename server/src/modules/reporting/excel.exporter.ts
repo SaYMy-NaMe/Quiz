@@ -17,6 +17,9 @@ export interface ExportInput {
  *                        Time Taken (hh:mm:ss) | Started At | Submitted At | Violations | Reason
  * Sheet 2 "Answers":     one row per (submission, question) with chosen/correct option text.
  */
+const optionLabel = (o: { text: string; imageUrl?: string } | undefined): string =>
+  o ? o.text || (o.imageUrl ? `[image] ${o.imageUrl}` : '') : '';
+
 export async function writeSubmissionsWorkbook(out: Writable, { quiz, submissions, leaderboard }: ExportInput): Promise<void> {
   const workbook = new ExcelJS.stream.xlsx.WorkbookWriter({ stream: out, useStyles: true, useSharedStrings: true });
   workbook.creator = 'Quiz Platform';
@@ -89,8 +92,8 @@ export async function writeSubmissionsWorkbook(out: Writable, { quiz, submission
         id: s.id,
         n: i + 1,
         prompt: q.prompt || (q.promptType === 'image' ? `[image] ${q.imageUrl ?? ''}` : ''),
-        chosen: chosen?.text ?? '',
-        correct: correct?.text ?? '',
+        chosen: optionLabel(chosen),
+        correct: optionLabel(correct),
         isCorrect: chosen ? (chosen.id === q.correctOptionId ? 'YES' : 'NO') : 'BLANK',
         points: q.points,
       };
