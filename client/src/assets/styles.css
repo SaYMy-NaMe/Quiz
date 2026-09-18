@@ -192,3 +192,20 @@ code { font-family: var(--mono); font-size: 0.9em; background: var(--surface-2);
   .card { padding: 1.1rem; }
   .sticky-bar { flex-direction: column; align-items: stretch; }
 }
+
+/* Google-Forms-style cards */
+:root { --gf-accent: #673ab7; --gf-accent-soft: #f0ebf8; --gf-bg: #f0ebf8; }
+.gf-page { background: var(--gf-bg); min-height: 100%; }
+.gf-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 0.75rem; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.gf-card--title { border-top: 10px solid var(--gf-accent); }
+.gf-card--active { border-left: 6px solid var(--primary); }
+.gf-card__title { font-size: 1.6rem; font-weight: 400; margin-bottom: 0.25rem; }
+.gf-card__desc { color: var(--muted); }
+.gf-field-head { display: grid; grid-template-columns: 1fr 200px; gap: 1rem; align-items: start; }
+.gf-input { width: 100%; border: none; border-bottom: 1px solid var(--border); background: var(--surface-2); padding: 0.7rem 0.6rem; font: inherit; font-size: 1rem; border-radius: 4px 4px 0 0; }
+.gf-input:focus { outline: none; border-bottom: 2px solid var(--gf-accent); }
+.gf-toolbar { display: flex; justify-content: flex-end; gap: 0.25rem; align-items: center; border-top: 1px solid var(--border); margin-top: 1rem; padding-top: 0.75rem; }
+.gf-toolbar__sep { width: 1px; height: 24px; background: var(--border); margin: 0 0.5rem; }
+.gf-add { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin: 0.5rem 0 1rem; }
+.gf-required-dot { color: var(--danger); margin-left: 0.15rem; }
+@media (max-width: 640px) { .gf-field-head { grid-template-columns: 1fr; } }
