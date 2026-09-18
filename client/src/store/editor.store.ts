@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { MAX_OPTIONS, MIN_OPTIONS } from '@shared';
-import type { DraftQuestion, DraftSchemaField, Quiz, QuizDraft } from '../types';
-import { DraftFactory, quizToDraft } from '../services/draft.mapper';
+import type { DraftQuestion, DraftSchemaField, Quiz, QuizDraft } from '@/types';
+import { DraftFactory, quizToDraft } from '@/modules/builder/services/draft.mapper';
 
 /**
  * Editor state is isolated from the examinee runtime store: the two lifecycles

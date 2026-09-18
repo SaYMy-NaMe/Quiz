@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useEditorStore } from './editor.store';
-import { draftToPayload, quizToDraft } from '../services/draft.mapper';
-import { validateDraft, hasErrors } from '../services/draft.validator';
-import type { Quiz } from '../types';
+import { draftToPayload, quizToDraft } from '@/modules/builder/services/draft.mapper';
+import { validateDraft, hasErrors } from '@/modules/builder/services/draft.validator';
+import type { Quiz } from '@/types';
 
 const state = () => useEditorStore.getState();
 

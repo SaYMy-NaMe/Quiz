@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAttemptStore } from '@/modules/quiz/store/attempt.store';
-import { useTimerStore } from '@/modules/quiz/store/timer.store';
+import { useAttemptStore } from '@/store/attempt.store';
+import { useTimerStore } from '@/store/timer.store';
 import { attemptApi } from '../services/attempt.api';
 import { submissionApi } from '../services/submission.api';
-import type { SubmissionReason } from '@/modules/quiz/types';
+import type { SubmissionReason } from '@/types';
 import { HttpError } from '@/services/http';
 
 export const examineePaths = {

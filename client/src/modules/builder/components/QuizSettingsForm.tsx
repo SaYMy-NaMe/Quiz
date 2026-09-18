@@ -1,5 +1,5 @@
 import { MAX_DURATION_SECONDS, MIN_DURATION_SECONDS } from '@shared';
-import { useEditorStore } from '../store/editor.store';
+import { useEditorStore } from '@/store/editor.store';
 
 export function QuizSettingsForm({ errors = {} }: { errors?: Record<string, string> }) {
   const settings = useEditorStore((s) => s.draft.settings);

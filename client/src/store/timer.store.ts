@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { createCountdown, type Countdown } from '../services/countdown';
+import { createCountdown, type Countdown } from '@/utils/countdown';
 
 type TimerStatus = 'idle' | 'running' | 'expired';
 

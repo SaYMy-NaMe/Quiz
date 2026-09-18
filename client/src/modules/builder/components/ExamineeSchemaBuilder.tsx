@@ -1,5 +1,5 @@
-import { useEditorStore } from '@/modules/quiz/store/editor.store';
-import type { DraftSchemaField } from '@/modules/quiz/types';
+import { useEditorStore } from '@/store/editor.store';
+import type { DraftSchemaField } from '@/types';
 
 const TYPE_LABELS: Record<DraftSchemaField['type'], string> = {
   text: 'Short text',

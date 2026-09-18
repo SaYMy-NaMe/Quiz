@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import type { QuizSummary } from '@/modules/quiz/types';
+import type { QuizSummary } from '@/types';
 import { CopyLinkButton, buildShareUrl } from '@/modules/share';
 import { formatPercent } from '@/utils/format';
 

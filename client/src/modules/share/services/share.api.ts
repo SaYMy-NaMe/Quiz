@@ -1,5 +1,5 @@
 import { http } from '@/services/http';
-import type { PublicQuiz } from '@/modules/quiz/types';
+import type { PublicQuiz } from '@/types';
 
 export interface Invite {
   id: string;

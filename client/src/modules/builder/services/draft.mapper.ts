@@ -1,5 +1,5 @@
 import { nextKey } from '@/utils/keys';
-import type { DraftOption, DraftQuestion, DraftSchemaField, Quiz, QuizDraft, QuizUpsertPayload } from '../types';
+import type { DraftOption, DraftQuestion, DraftSchemaField, Quiz, QuizDraft, QuizUpsertPayload } from '@/types';
 
 /** Factory for blank editor entities (mirrors the server-side QuestionFactory). */
 export const DraftFactory = {

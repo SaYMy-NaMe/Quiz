@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useEditorStore } from '../store/editor.store';
+import { useEditorStore } from '@/store/editor.store';
 import { quizApi } from '../services/quiz.api';
 import { draftToPayload } from '../services/draft.mapper';
 import { validateDraft, hasErrors, type DraftErrors } from '../services/draft.validator';
@@ -9,7 +9,7 @@ import { QuizSettingsForm } from './QuizSettingsForm';
 import { HttpError } from '@/services/http';
 import { Spinner } from '@/components/Spinner';
 import { Navbar } from '@/components/Navbar';
-import { ExamineeSchemaBuilder } from '@/modules/examinee/components/ExamineeSchemaBuilder';
+import { ExamineeSchemaBuilder } from '@/modules/builder/components/ExamineeSchemaBuilder';
 
 type Tab = 'questions' | 'examinee' | 'settings';
 

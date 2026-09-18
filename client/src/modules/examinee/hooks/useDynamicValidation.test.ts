@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validateExaminee } from '@shared';
-import type { SchemaField } from '@/modules/quiz/types';
+import type { SchemaField } from '@/types';
 
 const fields: SchemaField[] = [
   { fieldId: 'name', label: 'Name', type: 'text', required: true },

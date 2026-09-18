@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { localStore } from '@/services/storage';
-import type { AnswerMap, Attempt, PublicQuestion, SubmissionReceipt } from '../types';
+import type { AnswerMap, Attempt, PublicQuestion, SubmissionReceipt } from '@/types';
 
 /**
  * Runtime state of an examinee's attempt. Persisted to localStorage per share

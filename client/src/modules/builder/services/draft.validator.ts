@@ -1,4 +1,4 @@
-import type { QuizDraft } from '../types';
+import type { QuizDraft } from '@/types';
 
 export interface DraftErrors {
   form: Record<string, string>;

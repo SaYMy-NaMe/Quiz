@@ -1,6 +1,6 @@
 import { MAX_OPTIONS, MIN_OPTIONS } from '@shared';
-import type { DraftQuestion } from '../types';
-import { useEditorStore } from '../store/editor.store';
+import type { DraftQuestion } from '@/types';
+import { useEditorStore } from '@/store/editor.store';
 import { ImageUploader } from './ImageUploader';
 
 interface QuestionEditorProps {

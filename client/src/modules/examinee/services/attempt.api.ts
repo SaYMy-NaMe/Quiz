@@ -1,5 +1,5 @@
 import { http } from '@/services/http';
-import type { Attempt, PublicQuestion, ExamineeRecord } from '@/modules/quiz/types';
+import type { Attempt, PublicQuestion, ExamineeRecord } from '@/types';
 
 export interface StartedAttempt {
   attempt: Attempt;

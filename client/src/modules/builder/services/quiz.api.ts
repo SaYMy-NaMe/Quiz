@@ -1,5 +1,5 @@
 import { http } from '@/services/http';
-import type { Quiz, QuizSummary, QuizUpsertPayload } from '../types';
+import type { Quiz, QuizSummary, QuizUpsertPayload } from '@/types';
 
 interface QuizResponse {
   quiz: Quiz;

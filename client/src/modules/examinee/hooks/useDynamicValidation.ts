@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ExamineeSchemaBuilder, validateExaminee } from '@shared';
-import type { ExamineeRecord, SchemaField } from '@/modules/quiz/types';
+import type { ExamineeRecord, SchemaField } from '@/types';
 
 export type FormValues = Record<string, string>;
 

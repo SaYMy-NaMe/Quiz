@@ -1,5 +1,5 @@
-import { useTimerStore } from '../store/timer.store';
-import { formatClock } from '../services/countdown';
+import { useTimerStore } from '@/store/timer.store';
+import { formatClock } from '@/utils/countdown';
 
 export function Timer() {
   const remaining = useTimerStore((s) => s.remaining);
