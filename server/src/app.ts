@@ -9,6 +9,7 @@ import { errorHandler } from '@/middleware/error-handler';
 import type { Container } from '@/container';
 import { attachSession, createAuthRouter } from '@/modules/auth';
 import { createQuizRouter, createUploadRouter } from '@/modules/quiz';
+import { createShareRouter, createInviteRouter } from '@/modules/share';
 import path from 'node:path';
 
 export function createApp(container: Container): express.Express {
@@ -30,7 +31,9 @@ export function createApp(container: Container): express.Express {
 
   app.use(attachSession(container.auth));
   app.use('/api/auth', createAuthRouter(container.auth));
+  app.use('/api/quizzes/:id/invites', createInviteRouter(container.share));
   app.use('/api/quizzes', createQuizRouter(container.quizzes));
+  app.use('/api/share', createShareRouter(container.share));
   app.use('/api/uploads', createUploadRouter(env.UPLOAD_DIR));
   app.use(
     '/uploads',
