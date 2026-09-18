@@ -142,6 +142,7 @@ code { font-family: var(--mono); font-size: 0.9em; background: var(--surface-2);
 /* Modal */
 .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 18, 30, 0.55); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
 .modal { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; width: 100%; max-width: 520px; box-shadow: var(--shadow); }
+.modal--wide { max-width: 860px; }
 
 /* Navbar */
 .navbar { background: var(--surface); border-bottom: 1px solid var(--border); }
