@@ -8,7 +8,7 @@ import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { routes } from '@/router/routes';
 import { useAttemptStore } from '@/store/attempt.store';
 import { useTimerStore } from '@/store/timer.store';
-import { config } from '@/config';
+import { config } from '@/utils/constants';
 
 const TOKEN = 'AbCdEfGhIjKlMnOpQrStUv';
 const quiz = {

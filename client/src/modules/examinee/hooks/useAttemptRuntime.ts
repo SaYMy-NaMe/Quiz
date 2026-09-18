@@ -5,7 +5,7 @@ import { useTimerStore } from '@/store/timer.store';
 import { attemptApi } from '../services/attempt.api';
 import { submissionApi } from '../services/submission.api';
 import type { SubmissionReason } from '@/types';
-import { HttpError } from '@/services/http';
+import { HttpError } from '@/utils/api';
 
 const withInvite = (path: string, invite: string | null) => `${path}${invite ? `?invite=${encodeURIComponent(invite)}` : ''}`;
 

@@ -1,4 +1,9 @@
-import { config } from '@/config';
+/**
+ * Central API client. Every request the app makes goes through `api` (or `apiFetch` for
+ * non-JSON responses such as file downloads), so the base URL, credentials policy, error
+ * shape and session-expiry handling live in exactly one place.
+ */
+import { API_BASE_URL } from './constants';
 
 export class HttpError extends Error {
   constructor(
@@ -18,6 +23,11 @@ interface ErrorBody {
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+interface RequestOptions {
+  body?: unknown;
+  signal?: AbortSignal;
+}
+
 type UnauthorizedListener = (path: string) => void;
 const unauthorizedListeners = new Set<UnauthorizedListener>();
 
@@ -31,22 +41,38 @@ export function onUnauthorized(listener: UnauthorizedListener): () => void {
   return () => unauthorizedListeners.delete(listener);
 }
 
-interface RequestOptions {
-  body?: unknown;
-  signal?: AbortSignal;
+/** Absolute URL for an API path (`/quizzes` → `http://localhost:4000/api/quizzes`). */
+export const apiUrl = (path: string): string => `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+
+/**
+ * Raw fetch against the API with the credentials policy applied. Use it when you need the
+ * Response itself (blobs, streams); prefer `api.*` for JSON.
+ */
+export function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  return fetch(apiUrl(path), { credentials: 'include', ...init });
 }
 
-/** Thin fetch wrapper: JSON in/out, cookie credentials, typed errors. */
+/** Extracts the API's `{ error: { code, message, details } }` envelope into an HttpError. */
+export async function toHttpError(res: Response): Promise<HttpError> {
+  let err: ErrorBody['error'];
+  try {
+    err = ((await res.json()) as ErrorBody).error;
+  } catch {
+    /* non-JSON body */
+  }
+  return new HttpError(res.status, err?.code ?? 'HTTP_ERROR', err?.message ?? res.statusText, err?.details);
+}
+
 async function request<T>(method: Method, path: string, { body, signal }: RequestOptions = {}): Promise<T> {
   const isForm = typeof FormData !== 'undefined' && body instanceof FormData;
-  const init: RequestInit = { method, credentials: 'include' };
+  const init: RequestInit = { method };
   if (isForm) init.body = body;
   else if (body !== undefined) {
     init.headers = { 'Content-Type': 'application/json' };
     init.body = JSON.stringify(body);
   }
   if (signal) init.signal = signal;
-  const res = await fetch(`${config.apiBaseUrl}${path}`, init);
+  const res = await apiFetch(path, init);
 
   if (res.status === 204) return undefined as T;
 
@@ -61,7 +87,7 @@ async function request<T>(method: Method, path: string, { body, signal }: Reques
   return data as T;
 }
 
-export const http = {
+export const api = {
   get: <T>(path: string, opts?: RequestOptions) => request<T>('GET', path, opts),
   post: <T>(path: string, body?: unknown, opts?: RequestOptions) => request<T>('POST', path, { ...opts, body }),
   put: <T>(path: string, body?: unknown, opts?: RequestOptions) => request<T>('PUT', path, { ...opts, body }),

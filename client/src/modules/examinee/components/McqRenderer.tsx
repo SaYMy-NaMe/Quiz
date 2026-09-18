@@ -1,5 +1,5 @@
 import type { PublicQuestion, GradedQuestionResult } from '@/types';
-import { assetUrl } from '@/config';
+import { assetUrl } from '@/utils/constants';
 
 interface Props {
   question: PublicQuestion;

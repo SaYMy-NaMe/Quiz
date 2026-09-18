@@ -1,9 +1,9 @@
 import express from 'express';
 import helmet from 'helmet';
-import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import pinoHttp from 'pino-http';
-import { env } from '@/config/env';
+import { env, allowedOrigins } from '@/config/env';
+import { createCorsMiddleware } from '@/middleware/cors';
 import { logger } from '@/services/logger';
 import { errorHandler } from '@/middleware/error-handler';
 import type { Container } from '@/container';
@@ -41,7 +41,7 @@ export function createApp(container: Container, { clientDist = env.CLIENT_DIST }
       },
     }),
   );
-  app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));
+  app.use(createCorsMiddleware(allowedOrigins(env)));
   app.use(cookieParser());
   app.use(express.json({ limit: '1mb' }));
   if (env.NODE_ENV !== 'test') {

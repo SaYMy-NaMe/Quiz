@@ -3,7 +3,7 @@ import type { Quiz } from '@/types';
 import { shareApi, type Invite } from '../services/share.api';
 import { buildShareUrl } from '../services/link-builder';
 import { CopyLinkButton } from './CopyLinkButton';
-import { HttpError } from '@/services/http';
+import { HttpError } from '@/utils/api';
 import { quizApi } from '@/modules/builder/services/quiz.api';
 import { Modal } from '@/components/Modal';
 

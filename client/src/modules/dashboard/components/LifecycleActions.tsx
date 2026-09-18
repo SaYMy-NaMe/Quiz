@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Quiz } from '@/types';
 import { quizApi } from '@/modules/builder/services/quiz.api';
-import { HttpError } from '@/services/http';
+import { HttpError } from '@/utils/api';
 
 interface Props {
   quiz: Quiz;

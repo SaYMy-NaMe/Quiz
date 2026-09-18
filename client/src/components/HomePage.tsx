@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { config } from '@/config';
+import { config } from '@/utils/constants';
 
 export function Component() {
   return (

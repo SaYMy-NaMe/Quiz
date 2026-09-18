@@ -25,18 +25,25 @@ Quiz/
 ├── scripts/sync-shared.mjs mirrors server/src/shared → client/src/shared (--check detects drift)
 ├── client/                 ───────── independent web app ─────────
 │   ├── package.json  package-lock.json  node_modules/
-│   ├── .env.example  .env              VITE_API_URL → backend origin
+│   ├── .env.example                    template
+│   ├── .env.development                VITE_API_BASE_URL=http://localhost:4000   (npm run dev)
+│   ├── .env.production                 VITE_API_BASE_URL=https://your-app.vercel.app (npm run build)
+│   ├── .env.remote                     hosted API while developing            (npm run dev:remote)
 │   ├── vite.config.ts  tsconfig.json  tsconfig.base.json
 │   ├── public/_redirects       SPA fallback for static hosts
 │   └── src/
 │       ├── shared/             vendored domain contracts (mirror of server/src/shared)
-│       ├── config/index.ts     apiBaseUrl / assetUrl from VITE_API_URL
+│       ├── utils/
+│       │   ├── api.ts          central API client (api.get/post/…, apiFetch, HttpError, 401 observer)
+│       │   ├── constants.ts    API_BASE_URL / assetUrl resolved from VITE_API_BASE_URL + Vite mode
+│       │   └── countdown.ts · format.ts · keys.ts
 │       ├── modules/            auth · builder · dashboard · examinee · leaderboard · proctor · reporting · share
-│       ├── store/  types/  utils/  router/  services/  components/  assets/
+│       │                       (each module's *.api.ts calls utils/api — no direct fetch elsewhere)
+│       ├── store/  types/  router/  services/(storage)  components/  assets/
 │       └── main.tsx
 └── server/                 ───────── independent API ─────────
     ├── package.json  package-lock.json  node_modules/
-    ├── .env.example  .env              PORT, NODE_ENV, DATABASE_URL, …
+    ├── .env.example  .env              PORT, NODE_ENV, DATABASE_URL, CLIENT_ORIGIN(S), …
     ├── prisma/
     │   ├── schema.prisma       data model (provider: sqlite → postgresql when you migrate)
     │   └── migrations/         versioned SQL applied automatically at startup
@@ -51,6 +58,7 @@ Quiz/
         ├── db/migrate.ts       programmatic `prisma migrate deploy`
         ├── shared/             domain contracts (source of truth)
         ├── modules/            auth · quiz · share · examinee · proctor · leaderboard · reporting · dashboard
+        ├── middleware/cors.ts  env-driven CORS allow-list (exact + wildcard origins)
         ├── middleware/  services/  utils/
         └── test/               isolated per-file SQLite clones for vitest
 ```
@@ -80,9 +88,36 @@ npm run dev                   # concurrently: server + client
 npm run lint  ·  npm run check:shared
 ```
 
-The client calls `${VITE_API_URL}/api/...` with `credentials: 'include'`; the server allows that
-origin via `CLIENT_ORIGIN` (CORS with credentials). Leave `VITE_API_URL` empty to use the Vite
-proxy / same-origin mode instead.
+### Switching the client between local and hosted APIs
+
+The client never hard-codes a server. `client/src/utils/constants.ts` reads `VITE_API_BASE_URL`
+from the env file that matches the Vite **mode**:
+
+| Command | Mode | Env file | Talks to |
+|---|---|---|---|
+| `npm run dev` | development | `.env.development` | `http://localhost:4000` |
+| `npm run dev:remote` | remote | `.env.remote` | hosted API (e.g. `https://your-app.vercel.app`) |
+| `npm run build` | production | `.env.production` | hosted API |
+| `npm run build:local` | development | `.env.development` | local API (for same-machine previews) |
+
+Override any of them without touching git: `echo 'VITE_API_BASE_URL=https://staging.example.com' > client/.env.local`
+(`.env.local` is git-ignored and wins over the mode file). An empty value means same-origin
+`/api` (Vite proxy in dev, or the Express server serving the build).
+
+### CORS
+
+`server/src/middleware/cors.ts` builds the allow-list from `CLIENT_ORIGIN` + `CLIENT_ORIGINS`
+(comma-separated; `https://*.vercel.app` covers preview deployments) and answers with
+`Access-Control-Allow-Credentials: true` so the httpOnly session cookie works cross-origin.
+Unknown origins get no CORS headers; requests without an `Origin` header (curl, same-origin)
+pass through.
+
+```env
+# server/.env
+CLIENT_ORIGIN=http://localhost:5173
+CLIENT_ORIGINS=https://your-app.vercel.app,https://*.vercel.app
+COOKIE_SAMESITE=none   # + HTTPS=true when client and API are on different sites
+```
 
 ## Database layer (Prisma)
 

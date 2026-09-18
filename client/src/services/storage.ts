@@ -1,4 +1,4 @@
-import { config } from '@/config';
+import { STORAGE_PREFIX } from '@/utils/constants';
 
 /** Adapter over Web Storage with namespacing and JSON (de)serialisation. */
 export interface StorageAdapter {
@@ -8,7 +8,7 @@ export interface StorageAdapter {
 }
 
 function createWebStorage(backend: Storage | null): StorageAdapter {
-  const k = (key: string) => `${config.storagePrefix}${key}`;
+  const k = (key: string) => `${STORAGE_PREFIX}${key}`;
   return {
     get<T>(key: string): T | null {
       try {

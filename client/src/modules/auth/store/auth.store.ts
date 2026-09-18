@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { Credentials, Instructor, RegisterPayload } from '@shared';
 import { authApi } from '../services/auth.api';
-import { HttpError, onUnauthorized } from '@/services/http';
+import { HttpError, onUnauthorized } from '@/utils/api';
 import { sessionStore } from '@/services/storage';
 
 type Status = 'idle' | 'loading' | 'authenticated' | 'anonymous';
