@@ -18,6 +18,7 @@ import { createEventBus, type EventBus } from '@/services/event-bus';
 import { createProctorService, type ProctorService } from '@/modules/proctor';
 import { createLeaderboardService, ScoreDurationTimestampStrategy, type LeaderboardService } from '@/modules/leaderboard';
 import { createReportingService, type ReportingService } from '@/modules/reporting';
+import { createAnalyticsService, type AnalyticsService } from '@/modules/dashboard';
 import {
   createTokenService,
   createInviteRepository,
@@ -42,6 +43,7 @@ export interface Container {
   proctor: ProctorService;
   leaderboard: LeaderboardService;
   reporting: ReportingService;
+  analytics: AnalyticsService;
 }
 
 export function createContainer(overrides: { db?: Db } = {}): Container {
@@ -73,5 +75,7 @@ export function createContainer(overrides: { db?: Db } = {}): Container {
 
   const reporting = createReportingService({ quizzes, attempts: attemptRepo, leaderboard });
 
-  return { db, auth, quizzes, share, attemptRepo, attempts, submissions, events, proctor, leaderboard, reporting };
+  const analytics = createAnalyticsService(quizzes, attemptRepo);
+
+  return { db, auth, quizzes, share, attemptRepo, attempts, submissions, events, proctor, leaderboard, reporting, analytics };
 }

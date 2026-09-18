@@ -13,6 +13,7 @@ import { createShareRouter, createInviteRouter } from '@/modules/share';
 import { createProctorRouter } from '@/modules/proctor';
 import { createInstructorLeaderboardRouter, createPublicLeaderboardRouter } from '@/modules/leaderboard';
 import { createReportingRouter } from '@/modules/reporting';
+import { createDashboardRouter } from '@/modules/dashboard';
 import path from 'node:path';
 
 export function createApp(container: Container): express.Express {
@@ -37,6 +38,7 @@ export function createApp(container: Container): express.Express {
   app.use('/api/quizzes/:id/invites', createInviteRouter(container.share));
   app.use('/api/quizzes/:id/leaderboard', createInstructorLeaderboardRouter(container.leaderboard));
   app.use('/api/quizzes/:id/export', createReportingRouter(container.reporting));
+  app.use('/api/quizzes/:id', createDashboardRouter(container.analytics));
   app.use('/api/quizzes', createQuizRouter(container.quizzes));
   app.use('/api/share/:token/attempts/:attemptId/violations', createProctorRouter(container.share, container.proctor));
   app.use('/api/share/:token/attempts', createAttemptRouter(container.share, container.attempts, container.submissions));

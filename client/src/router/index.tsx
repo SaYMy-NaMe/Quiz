@@ -25,10 +25,8 @@ export const router = createBrowserRouter([
       {
         element: <RequireAuth />,
         children: [
-          {
-            path: 'dashboard',
-            lazy: () => import('@/modules/dashboard/pages/DashboardPlaceholder'),
-          },
+          { path: 'dashboard', lazy: () => import('@/modules/dashboard/pages/DashboardPage') },
+          { path: 'dashboard/quizzes/:id', lazy: () => import('@/modules/dashboard/pages/QuizOverviewPage') },
           {
             path: 'dashboard/quizzes/new',
             lazy: () => import('@/modules/quiz/pages').then((m) => ({ Component: m.QuizEditorPage })),
