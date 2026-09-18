@@ -1,9 +1,15 @@
-import { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync as DatabaseSyncType } from 'node:sqlite';
 import fs from 'node:fs';
 import path from 'node:path';
 import { env } from '@/config/env';
 
-export type Db = DatabaseSync;
+export type Db = DatabaseSyncType;
+
+/**
+ * `node:sqlite` is resolved through `process.getBuiltinModule` so that bundlers
+ * (Vite/vitest) which predate the module never try to resolve the specifier.
+ */
+const { DatabaseSync } = process.getBuiltinModule('node:sqlite') as typeof import('node:sqlite');
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS instructors (
