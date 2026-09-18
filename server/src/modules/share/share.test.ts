@@ -81,6 +81,20 @@ describe('share links', () => {
     expect((await request(app).get(`/api/share/${token}?invite=${inv.body.invites[0].token}`)).status).toBe(404);
   });
 
+  it('rotates the share token and invalidates old links', async () => {
+    const created = await agent.post('/api/quizzes').send(payload);
+    const id = created.body.quiz.id as string;
+    expect((await agent.post(`/api/quizzes/${id}/rotate-token`)).status).toBe(409);
+    const pub = await agent.post(`/api/quizzes/${id}/publish`);
+    const oldToken = pub.body.quiz.shareToken as string;
+    const rotated = await agent.post(`/api/quizzes/${id}/rotate-token`);
+    expect(rotated.status).toBe(200);
+    const newToken = rotated.body.quiz.shareToken as string;
+    expect(newToken).not.toBe(oldToken);
+    expect((await request(app).get(`/api/share/${oldToken}`)).status).toBe(404);
+    expect((await request(app).get(`/api/share/${newToken}`)).status).toBe(200);
+  });
+
   it('never lists quizzes without authentication', async () => {
     expect((await request(app).get('/api/quizzes')).status).toBe(401);
     expect((await request(app).get('/api/share')).status).toBe(404);

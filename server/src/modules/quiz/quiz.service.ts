@@ -22,6 +22,8 @@ export interface QuizService {
   close(ownerId: string, quizId: string): Quiz;
   reopen(ownerId: string, quizId: string): Quiz;
   setLeaderboardVisibility(ownerId: string, quizId: string, visible: boolean): Quiz;
+  /** Issues a fresh share token; every previously distributed link stops resolving. */
+  rotateShareToken(ownerId: string, quizId: string): Quiz;
   /** Internal lookup used by share/attempt modules (no ownership check). */
   findByToken(token: string): Quiz | null;
   findById(quizId: string): Quiz | null;
@@ -137,5 +139,11 @@ export function createQuizService({ repo, tokens }: Deps): QuizService {
     reopen: (o, id) => transition(o, id, (q) => stateOf(q).reopen(q)),
 
     setLeaderboardVisibility: (o, id, visible) => transition(o, id, (q) => ({ ...q, leaderboardVisible: visible })),
+
+    rotateShareToken: (o, id) =>
+      transition(o, id, (q) => {
+        if (!q.shareToken) throw conflict('Publish the quiz before rotating its link');
+        return { ...q, shareToken: tokens.issueShareToken() };
+      }),
   };
 }

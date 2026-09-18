@@ -98,7 +98,7 @@ export function Component() {
 
         {tab === 'share' && (
           <div className="card">
-            <ShareLinkPanel quiz={quiz} />
+            <ShareLinkPanel quiz={quiz} onQuizChange={setQuiz} />
           </div>
         )}
         {tab === 'leaderboard' && (

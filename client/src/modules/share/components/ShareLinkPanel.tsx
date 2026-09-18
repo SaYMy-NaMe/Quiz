@@ -4,13 +4,18 @@ import { shareApi, type Invite } from '../services/share.api';
 import { buildShareUrl } from '../services/link-builder';
 import { CopyLinkButton } from './CopyLinkButton';
 import { HttpError } from '@/services/http';
+import { quizApi } from '@/modules/builder/services/quiz.api';
+import { Modal } from '@/components/Modal';
 
 interface Props {
   quiz: Quiz;
+  onQuizChange?: (quiz: Quiz) => void;
 }
 
 /** One-click share link generator + invite matrix for restricted quizzes. */
-export function ShareLinkPanel({ quiz }: Props) {
+export function ShareLinkPanel({ quiz, onQuizChange }: Props) {
+  const [rotating, setRotating] = useState(false);
+  const [confirmRotate, setConfirmRotate] = useState(false);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [emails, setEmails] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +74,38 @@ export function ShareLinkPanel({ quiz }: Props) {
         <div className="link-box">
           <input className="input" readOnly value={link} onFocus={(e) => e.currentTarget.select()} aria-label="Share link" />
           <CopyLinkButton text={link} />
+          {onQuizChange && (
+            <button type="button" className="btn btn--ghost" onClick={() => setConfirmRotate(true)} disabled={rotating} title="Generate a new link and invalidate the old one">
+              ↻ Regenerate
+            </button>
+          )}
         </div>
+        {confirmRotate && (
+          <Modal title="Regenerate share link?" onClose={() => setConfirmRotate(false)}>
+            <p>The current link (and every personal invite link) will stop working immediately. Existing submissions are kept.</p>
+            <div className="row row--end">
+              <button className="btn" onClick={() => setConfirmRotate(false)}>Cancel</button>
+              <button
+                className="btn btn--danger"
+                disabled={rotating}
+                onClick={async () => {
+                  setRotating(true);
+                  try {
+                    const { quiz: updated } = await quizApi.rotateToken(quiz.id);
+                    onQuizChange?.(updated);
+                    setConfirmRotate(false);
+                  } catch (err) {
+                    setError(err instanceof HttpError ? err.message : 'Could not regenerate the link');
+                  } finally {
+                    setRotating(false);
+                  }
+                }}
+              >
+                {rotating ? 'Regenerating…' : 'Regenerate link'}
+              </button>
+            </div>
+          </Modal>
+        )}
         <p className="small muted" style={{ marginTop: '0.5rem' }}>
           {restricted
             ? 'Restricted quizzes only open with a personal invite link below. The bare link returns 404.'
