@@ -1,12 +1,13 @@
 import ExcelJS from 'exceljs';
 import type { Writable } from 'node:stream';
-import type { Leaderboard, Quiz, Submission } from '@shared';
+import type { Leaderboard, Quiz, QuizAnalytics, Submission } from '@shared';
 import { formatHms, toDate, toIso } from './timestamp';
 
 export interface ExportInput {
   quiz: Quiz;
   submissions: Submission[];
   leaderboard: Leaderboard;
+  analytics: QuizAnalytics;
 }
 
 /**
@@ -16,11 +17,12 @@ export interface ExportInput {
  * Sheet 1 "Submissions": Rank | <dynamic examinee fields…> | Score | Max | % | Time Taken (s) |
  *                        Time Taken (hh:mm:ss) | Started At | Submitted At | Violations | Reason
  * Sheet 2 "Answers":     one row per (submission, question) with chosen/correct option text.
+ * Sheet 3 "Summary":     quiz metadata, export timestamp and per-question correct rates.
  */
 const optionLabel = (o: { text: string; imageUrl?: string } | undefined): string =>
   o ? o.text || (o.imageUrl ? `[image] ${o.imageUrl}` : '') : '';
 
-export async function writeSubmissionsWorkbook(out: Writable, { quiz, submissions, leaderboard }: ExportInput): Promise<void> {
+export async function writeSubmissionsWorkbook(out: Writable, { quiz, submissions, leaderboard, analytics }: ExportInput): Promise<void> {
   const workbook = new ExcelJS.stream.xlsx.WorkbookWriter({ stream: out, useStyles: true, useSharedStrings: true });
   workbook.creator = 'Quiz Platform';
   workbook.created = new Date();
@@ -102,6 +104,39 @@ export async function writeSubmissionsWorkbook(out: Writable, { quiz, submission
     });
   }
   answers.commit();
+
+  // --- Sheet 3: summary ------------------------------------------------------
+  const summary = workbook.addWorksheet('Summary');
+  summary.columns = [
+    { header: 'Metric', key: 'k', width: 34 },
+    { header: 'Value', key: 'v', width: 40 },
+  ];
+  summary.getRow(1).font = { bold: true };
+  const meta: [string, unknown][] = [
+    ['Quiz', quiz.title],
+    ['Quiz ID', quiz.id],
+    ['Exported At (ISO-8601)', new Date().toISOString()],
+    ['Time Limit (s)', quiz.durationSeconds],
+    ['Questions', quiz.questions.length],
+    ['Max Score', analytics.maxScore],
+    ['Submissions', analytics.submissionCount],
+    ['Average Score', analytics.averageScore ?? ''],
+    ['Average Percent', analytics.averagePercent ?? ''],
+    ['Average Duration (s)', analytics.averageDurationSeconds ?? ''],
+    ['Manual Submissions', analytics.reasons.manual],
+    ['Timed-out Submissions', analytics.reasons.timeout],
+    ['Violation Auto-submits', analytics.reasons.violation],
+    ['Total Proctor Violations', analytics.totalViolations],
+  ];
+  for (const [k, v] of meta) summary.addRow({ k, v }).commit();
+  summary.addRow({}).commit();
+  const head = summary.addRow({ k: 'Question', v: 'Correct Rate (%) · Correct / Answered' });
+  head.font = { bold: true };
+  head.commit();
+  analytics.questions.forEach((q, i) => {
+    summary.addRow({ k: `${i + 1}. ${q.prompt}`, v: `${Math.round(q.correctRate * 100)}% · ${q.correct} / ${q.answered}` }).commit();
+  });
+  summary.commit();
 
   await workbook.commit();
 }
