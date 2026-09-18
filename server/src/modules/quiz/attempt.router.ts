@@ -1,9 +1,16 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import type { AttemptService } from './attempt.service';
+import type { SubmissionService } from './submission.service';
 import type { ShareService } from '@/modules/share';
 import { resolveShare } from '@/modules/share';
 import { validateBody } from '@/middleware/validate';
+
+const SubmitSchema = z.object({
+  inviteToken: z.string().max(64).optional(),
+  answers: z.record(z.string().max(64)).default({}),
+  reason: z.enum(['manual', 'timeout', 'violation']).default('manual'),
+});
 
 const StartSchema = z.object({
   inviteToken: z.string().max(64).optional(),
@@ -11,7 +18,7 @@ const StartSchema = z.object({
 });
 
 /** Mounted at `/api/share/:token/attempts`; every route passes the access middleware. */
-export function createAttemptRouter(share: ShareService, attempts: AttemptService): Router {
+export function createAttemptRouter(share: ShareService, attempts: AttemptService, submissions: SubmissionService): Router {
   const router = Router({ mergeParams: true });
   router.use((_req, res, next) => {
     res.set('Cache-Control', 'no-store');
@@ -24,6 +31,15 @@ export function createAttemptRouter(share: ShareService, attempts: AttemptServic
 
   router.get('/:attemptId', resolveShare(share), (req, res) => {
     res.json(attempts.resume(req.share!, String(req.params['attemptId'])));
+  });
+
+  router.post('/:attemptId/submit', validateBody(SubmitSchema), resolveShare(share), (req, res) => {
+    const { answers, reason } = req.body as { answers: Record<string, string>; reason: 'manual' | 'timeout' | 'violation' };
+    res.json({ receipt: submissions.submit(req.share!, String(req.params['attemptId']), { answers, reason }) });
+  });
+
+  router.get('/:attemptId/result', resolveShare(share), (req, res) => {
+    res.json({ receipt: submissions.receipt(req.share!, String(req.params['attemptId'])) });
   });
 
   return router;
