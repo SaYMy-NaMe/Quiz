@@ -15,6 +15,7 @@ import {
   type SubmissionService,
 } from '@/modules/quiz';
 import { createEventBus, type EventBus } from '@/services/event-bus';
+import { createProctorService, type ProctorService } from '@/modules/proctor';
 import {
   createTokenService,
   createInviteRepository,
@@ -36,6 +37,7 @@ export interface Container {
   attempts: AttemptService;
   submissions: SubmissionService;
   events: EventBus;
+  proctor: ProctorService;
 }
 
 export function createContainer(overrides: { db?: Db } = {}): Container {
@@ -56,5 +58,7 @@ export function createContainer(overrides: { db?: Db } = {}): Container {
   const events = createEventBus();
   const submissions = createSubmissionService({ db, repo: attemptRepo, grading: new StandardGradingStrategy(), events });
 
-  return { db, auth, quizzes, share, attemptRepo, attempts, submissions, events };
+  const proctor = createProctorService(attemptRepo, events);
+
+  return { db, auth, quizzes, share, attemptRepo, attempts, submissions, events, proctor };
 }

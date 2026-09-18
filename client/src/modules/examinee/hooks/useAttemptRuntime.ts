@@ -38,6 +38,7 @@ export function useAttemptRuntime(token: string, invite: string | null, quizId: 
         const { receipt: r } = await submissionApi.submit(token, attempt.id, answers, reason, invite);
         useAttemptStore.getState().setReceipt(r);
         setPhase('done');
+        if (document.fullscreenElement) await document.exitFullscreen().catch(() => undefined);
         navigate(examineePaths.result(token, invite), { replace: true });
       } catch {
         submittingRef.current = false;

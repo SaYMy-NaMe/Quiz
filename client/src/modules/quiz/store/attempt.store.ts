@@ -30,6 +30,9 @@ interface AttemptState {
   restore: (token: string, attempt: Attempt, questions: PublicQuestion[], serverTime: string, persisted: PersistedAttempt) => void;
   answer: (questionId: string, optionId: string) => void;
   setReceipt: (receipt: SubmissionReceipt) => void;
+  /** Increments the local violation counter and returns the new value. */
+  recordViolation: () => number;
+  syncViolations: (count: number) => void;
   clear: (token: string) => void;
 }
 
@@ -85,6 +88,22 @@ export const useAttemptStore = create<AttemptState>((set, get) => {
 
     setReceipt(receipt) {
       set({ receipt });
+      persist();
+    },
+
+    recordViolation() {
+      const { attempt } = get();
+      if (!attempt) return 0;
+      const violations = attempt.violations + 1;
+      set({ attempt: { ...attempt, violations } });
+      persist();
+      return violations;
+    },
+
+    syncViolations(count) {
+      const { attempt } = get();
+      if (!attempt || count <= attempt.violations) return;
+      set({ attempt: { ...attempt, violations: count } });
       persist();
     },
 

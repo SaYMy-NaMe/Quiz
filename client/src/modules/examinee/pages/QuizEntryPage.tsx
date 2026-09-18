@@ -7,6 +7,7 @@ import { attemptApi } from '../services/attempt.api';
 import { useAttemptStore } from '@/modules/quiz/store/attempt.store';
 import { HttpError } from '@/services/http';
 import type { ExamineeRecord } from '@/modules/quiz/types';
+import { createProctor } from '@/modules/proctor';
 
 const testPath = (token: string, invite: string | null) => `/quiz/v/${token}/test${invite ? `?invite=${encodeURIComponent(invite)}` : ''}`;
 const resultPath = (token: string, invite: string | null) => `/quiz/v/${token}/result${invite ? `?invite=${encodeURIComponent(invite)}` : ''}`;
@@ -31,6 +32,8 @@ export function Component() {
     setBusy(true);
     setServerError(null);
     setFieldErrors(null);
+    // Fullscreen must be requested inside the user gesture; it persists across SPA navigation.
+    await createProctor().requestFullscreen();
     try {
       const started = await attemptApi.start(token, examinee, invite);
       begin(token, started.attempt, started.questions, started.serverTime);
