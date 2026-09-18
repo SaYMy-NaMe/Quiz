@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router-dom';
 import { shareApi } from '@/modules/share/services/share.api';
-import { HttpError } from '@/services/http';
+import { HttpError } from '@/utils/api';
 import type { PublicQuiz } from '@/types';
 
 export interface ShareLoaderData {

@@ -13,7 +13,10 @@ const EnvSchema = z.object({
     .default('true')
     .transform((v) => v !== 'false' && v !== '0'),
   UPLOAD_DIR: z.string().default('./uploads'),
+  /** Primary client origin (kept for simple setups). */
   CLIENT_ORIGIN: z.string().default('http://localhost:5173'),
+  /** Comma-separated additional origins; `https://*.vercel.app` style wildcards allowed. */
+  CLIENT_ORIGINS: z.string().default(''),
   SESSION_TTL_HOURS: z.coerce.number().positive().default(72),
   /** Directory of the built client to serve in production (empty disables static serving). */
   CLIENT_DIST: z.string().default('../client/dist'),
@@ -27,6 +30,10 @@ const EnvSchema = z.object({
 });
 
 export type Env = z.infer<typeof EnvSchema>;
+
+/** Every origin the API should accept, de-duplicated. */
+export const allowedOrigins = (e: Env): string[] =>
+  [...new Set([e.CLIENT_ORIGIN, ...e.CLIENT_ORIGINS.split(',')].map((o) => o.trim()).filter(Boolean))];
 
 /** Loads `.env` next to the server package when present (no dependency: Node ≥ 21.7). */
 function loadDotEnv(): void {

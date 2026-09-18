@@ -1,23 +1,12 @@
-import { config } from '@/config';
-import { HttpError } from '@/services/http';
+import { apiFetch, toHttpError } from '@/utils/api';
 
 /**
- * Downloads the streamed workbook. We use fetch (not a bare <a href>) so the
- * session cookie is sent and errors surface as JSON instead of a broken file.
+ * Downloads the streamed workbook. We use apiFetch (not a bare <a href>) so the session
+ * cookie is sent cross-origin and errors surface as JSON instead of a broken file.
  */
 export async function downloadSubmissionsXlsx(quizId: string, fallbackName = 'submissions.xlsx'): Promise<void> {
-  const res = await fetch(`${config.apiBaseUrl}/quizzes/${quizId}/export/xlsx`, { credentials: 'include' });
-  // (credentials: 'include' + CORS with CLIENT_ORIGIN lets this work cross-origin as well.)
-  if (!res.ok) {
-    let message = res.statusText;
-    try {
-      const body = (await res.json()) as { error?: { message?: string } };
-      message = body.error?.message ?? message;
-    } catch {
-      /* non-JSON error body */
-    }
-    throw new HttpError(res.status, 'EXPORT_FAILED', message);
-  }
+  const res = await apiFetch(`/quizzes/${quizId}/export/xlsx`);
+  if (!res.ok) throw await toHttpError(res);
   const disposition = res.headers.get('Content-Disposition') ?? '';
   const match = /filename="?([^"]+)"?/.exec(disposition);
   const filename = match?.[1] ?? fallbackName;

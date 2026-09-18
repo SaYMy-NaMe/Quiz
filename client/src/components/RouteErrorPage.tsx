@@ -1,5 +1,5 @@
 import { Link, isRouteErrorResponse, useRouteError, useRevalidator } from 'react-router-dom';
-import { HttpError } from '@/services/http';
+import { HttpError } from '@/utils/api';
 
 /**
  * Route-level error boundary. Only a genuine 404/403 renders as "not found";

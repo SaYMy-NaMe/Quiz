@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Leaderboard } from '@shared';
-import { HttpError } from '@/services/http';
+import { HttpError } from '@/utils/api';
 
 interface Options {
   /** Poll interval in ms; 0 disables polling. */

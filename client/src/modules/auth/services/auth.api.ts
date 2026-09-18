@@ -1,4 +1,4 @@
-import { http } from '@/services/http';
+import { api } from '@/utils/api';
 import type { Credentials, Instructor, RegisterPayload } from '@shared';
 
 interface InstructorResponse {
@@ -6,8 +6,8 @@ interface InstructorResponse {
 }
 
 export const authApi = {
-  register: (payload: RegisterPayload) => http.post<InstructorResponse>('/auth/register', payload),
-  login: (payload: Credentials) => http.post<InstructorResponse>('/auth/login', payload),
-  logout: () => http.post<unknown>('/auth/logout'),
-  me: () => http.get<InstructorResponse>('/auth/me'),
+  register: (payload: RegisterPayload) => api.post<InstructorResponse>('/auth/register', payload),
+  login: (payload: Credentials) => api.post<InstructorResponse>('/auth/login', payload),
+  logout: () => api.post<unknown>('/auth/logout'),
+  me: () => api.get<InstructorResponse>('/auth/me'),
 };

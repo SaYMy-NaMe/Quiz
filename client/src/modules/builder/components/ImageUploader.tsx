@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react';
 import { MAX_IMAGE_BYTES } from '@shared';
 import { quizApi } from '../services/quiz.api';
-import { HttpError } from '@/services/http';
-import { assetUrl } from '@/config';
+import { HttpError } from '@/utils/api';
+import { assetUrl } from '@/utils/constants';
 
 interface ImageUploaderProps {
   value: string | null;

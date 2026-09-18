@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useAuthStore } from '../store/auth.store';
-import { HttpError } from '@/services/http';
+import { HttpError } from '@/utils/api';
 import { TextField } from '@/components/TextField';
 
 const LoginSchema = z.object({

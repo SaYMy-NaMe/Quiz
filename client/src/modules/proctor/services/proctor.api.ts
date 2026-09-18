@@ -1,4 +1,4 @@
-import { http } from '@/services/http';
+import { api } from '@/utils/api';
 import type { ViolationKind } from './proctor';
 
 export interface ViolationReport {
@@ -9,7 +9,7 @@ export interface ViolationReport {
 
 export const proctorApi = {
   report: (token: string, attemptId: string, kind: ViolationKind, inviteToken?: string | null) =>
-    http.post<ViolationReport>(`/share/${encodeURIComponent(token)}/attempts/${attemptId}/violations`, {
+    api.post<ViolationReport>(`/share/${encodeURIComponent(token)}/attempts/${attemptId}/violations`, {
       kind,
       ...(inviteToken ? { inviteToken } : {}),
     }),

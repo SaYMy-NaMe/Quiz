@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/modules/auth/store/auth.store';
-import { config } from '@/config';
+import { config } from '@/utils/constants';
 
 export function Navbar() {
   const instructor = useAuthStore((s) => s.instructor);

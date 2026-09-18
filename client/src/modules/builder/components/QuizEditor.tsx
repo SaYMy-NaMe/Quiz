@@ -6,7 +6,7 @@ import { draftToPayload } from '../services/draft.mapper';
 import { validateDraft, hasErrors, type DraftErrors } from '../services/draft.validator';
 import { QuestionEditor } from './QuestionEditor';
 import { QuizSettingsForm } from './QuizSettingsForm';
-import { HttpError } from '@/services/http';
+import { HttpError } from '@/utils/api';
 import { Spinner } from '@/components/Spinner';
 import { Navbar } from '@/components/Navbar';
 import { ExamineeSchemaBuilder } from '@/modules/builder/components/ExamineeSchemaBuilder';

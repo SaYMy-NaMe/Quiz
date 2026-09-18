@@ -5,7 +5,7 @@ import { WizardSteps } from '../components/WizardSteps';
 import { ExamineeDetailsForm } from '../components/ExamineeDetailsForm';
 import { attemptApi } from '../services/attempt.api';
 import { useAttemptStore } from '@/store/attempt.store';
-import { HttpError } from '@/services/http';
+import { HttpError } from '@/utils/api';
 import type { ExamineeRecord } from '@/types';
 import { examineePaths } from '../hooks/useAttemptRuntime';
 

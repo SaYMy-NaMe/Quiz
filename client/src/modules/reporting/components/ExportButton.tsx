@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { downloadSubmissionsXlsx } from '../services/export.service';
-import { HttpError } from '@/services/http';
+import { HttpError } from '@/utils/api';
 
 interface Props {
   quizId: string;
