@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useLoaderData, useNavigate } from 'react-router-dom';
-import type { ShareLoaderData } from '@/router/share-loader';
+import { useNavigate } from 'react-router-dom';
+import { useShareData } from '@/router/useShareData';
 import { WizardSteps } from '../components/WizardSteps';
 import { ExamineeDetailsForm } from '../components/ExamineeDetailsForm';
 import { attemptApi } from '../services/attempt.api';
@@ -11,7 +11,7 @@ import { examineePaths } from '../hooks/useAttemptRuntime';
 
 /** Step 1: collect + validate examinee metadata. Nothing timed happens here. */
 export function Component() {
-  const { quiz, token, invite } = useLoaderData() as ShareLoaderData;
+  const { quiz, token, invite } = useShareData();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);

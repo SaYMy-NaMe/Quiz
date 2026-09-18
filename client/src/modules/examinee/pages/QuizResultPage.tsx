@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link, useLoaderData } from 'react-router-dom';
-import type { ShareLoaderData } from '@/router/share-loader';
+import { Link } from 'react-router-dom';
+import { useShareData } from '@/router/useShareData';
 import { WizardSteps } from '../components/WizardSteps';
 import { McqRenderer } from '@/modules/examinee/components/McqRenderer';
 import { useAttemptStore } from '@/store/attempt.store';
@@ -19,7 +19,7 @@ const REASON_LABEL: Record<SubmissionReceipt['reason'], string> = {
 };
 
 export function Component() {
-  const { quiz, token, invite } = useLoaderData() as ShareLoaderData;
+  const { quiz, token, invite } = useShareData();
   const storedReceipt = useAttemptStore((s) => s.receipt);
   const storedQuestions = useAttemptStore((s) => s.questions);
   const answers = useAttemptStore((s) => s.answers);

@@ -11,6 +11,11 @@ const EnvSchema = z.object({
   SESSION_TTL_HOURS: z.coerce.number().positive().default(72),
   /** Directory of the built client to serve in production (empty disables static serving). */
   CLIENT_DIST: z.string().default('../client/dist'),
+  /** Set to true only when the app is served over HTTPS (enables secure cookies + upgrade-insecure-requests). */
+  HTTPS: z
+    .string()
+    .default('false')
+    .transform((v) => v === 'true' || v === '1'),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

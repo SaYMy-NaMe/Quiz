@@ -10,8 +10,13 @@ export interface ShareLoaderData {
 }
 
 /**
- * Tokenized link resolution guard: any failure (unknown token, restricted
- * without a valid invite, unpublished quiz) surfaces as the same 404 page.
+ * Tokenized link resolution guard. The quiz is ALWAYS fetched from the public API
+ * (`GET /api/share/:token`, no credentials required) — never from localStorage or
+ * client state — so a copied link works in a fresh tab, another browser or incognito.
+ *
+ * Unknown token / restricted without invite / unpublished → 404 page.
+ * Anything else (network down, 5xx) propagates as-is so the error page can offer a retry
+ * instead of pretending the link is dead.
  */
 export async function shareLoader({ params, request }: LoaderFunctionArgs): Promise<ShareLoaderData> {
   const token = params.token ?? '';

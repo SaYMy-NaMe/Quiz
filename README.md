@@ -130,6 +130,21 @@ invalidated by submission / regrade events. There is no examinee-facing ranking 
 examinee field + Score, Max, %, Time Taken, Started/Submitted ISO-8601, Violations, Reason),
 *Answers* (every submission × question) and *Summary* (metadata + per-question correct rates).
 
+## Deploying & sharing links
+
+A copied share link (`/quiz/v/<token>`) must work in a fresh tab, another browser or incognito —
+it is resolved from the **public API** (`GET /api/share/:token`, alias `GET /api/quizzes/v/:token`)
+with no cookies or headers, and the client route is declared outside every auth guard.
+
+* **Single process (recommended):** `npm run build && npm start`. Express serves `client/dist`
+  with an SPA fallback for every non-`/api`, non-`/uploads` GET whenever the build exists
+  (independent of `NODE_ENV`).
+* **Vite dev / preview:** history-API fallback is on (`appType: 'spa'`); `/api` is proxied to :4000.
+* **Static hosts:** `client/public/_redirects` (Netlify-style `/* /index.html 200`) ships with the
+  build; point `apiBaseUrl` at your API origin and set `CLIENT_ORIGIN` for CORS.
+* **Plain-http deployments (LAN, staging):** leave `HTTPS=false` — with it on, the CSP adds
+  `upgrade-insecure-requests` and the session cookie becomes `Secure`, which breaks http clients.
+
 ## API summary
 
 | Method | Path | Auth |
