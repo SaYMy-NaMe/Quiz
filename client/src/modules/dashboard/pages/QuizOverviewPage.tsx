@@ -23,6 +23,7 @@ export function Component() {
   const [analytics, setAnalytics] = useState<QuizAnalytics | null>(null);
   const [tab, setTab] = useState<Tab>('share');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [regradeNote, setRegradeNote] = useState<string | null>(null);
   const board = useLeaderboard(useCallback(() => leaderboardApi.forQuiz(id), [id]), { pollMs: 15_000 });
 
   useEffect(() => {
@@ -110,8 +111,23 @@ export function Component() {
             {board.board && (
               <LeaderboardTable board={board.board} extraColumns={quiz.examineeFields.map((f) => ({ fieldId: f.fieldId, label: f.label }))} />
             )}
-            <div className="row row--end">
-              <button className="btn btn--sm" onClick={() => void board.refresh()}>Refresh</button>
+            <div className="row row--between">
+              <span className="small muted">{regradeNote}</span>
+              <div className="row">
+                <button
+                  className="btn btn--sm"
+                  title="Re-evaluate every submission against the current answer key"
+                  onClick={() =>
+                    void dashboardApi.regrade(id).then(({ result }) => {
+                      setRegradeNote(`Regraded ${result.regraded} submission${result.regraded === 1 ? '' : 's'}; ${result.changed} changed.`);
+                      void board.refresh();
+                    })
+                  }
+                >
+                  ⟳ Regrade
+                </button>
+                <button className="btn btn--sm" onClick={() => void board.refresh()}>Refresh</button>
+              </div>
             </div>
           </div>
         )}

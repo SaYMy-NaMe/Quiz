@@ -15,4 +15,6 @@ export { createAttemptRouter } from './attempt.router';
 export { StandardGradingStrategy, NegativeMarkingStrategy } from './grading.strategy';
 export type { GradingStrategy, GradeResult } from './grading.strategy';
 export { createSubmissionService } from './submission.service';
+export { createGradingService } from './grading.service';
+export type { GradingService, RegradeResult } from './grading.service';
 export type { SubmissionService } from './submission.service';
