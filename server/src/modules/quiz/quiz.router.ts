@@ -40,6 +40,8 @@ export function createQuizRouter(quizzes: QuizService): Router {
   router.post('/:id/close', (req, res) => res.json({ quiz: quizzes.close(owner(req), id(req)) }));
   router.post('/:id/reopen', (req, res) => res.json({ quiz: quizzes.reopen(owner(req), id(req)) }));
 
+  router.post('/:id/rotate-token', (req, res) => res.json({ quiz: quizzes.rotateShareToken(owner(req), id(req)) }));
+
   router.patch('/:id/leaderboard-visibility', validateBody(VisibilitySchema), (req, res) => {
     res.json({ quiz: quizzes.setLeaderboardVisibility(owner(req), id(req), bodyOf(req, VisibilitySchema).visible) });
   });
