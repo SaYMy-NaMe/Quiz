@@ -1,5 +1,4 @@
-import type { Db } from '@/services/database';
-import { openDatabase } from '@/services/database';
+import { createPrisma, type Db } from '@/db/prisma';
 import { env } from '@/config/env';
 import { createAuthRepository, createAuthService, type AuthService } from '@/modules/auth';
 import {
@@ -50,7 +49,7 @@ export interface Container {
 }
 
 export function createContainer(overrides: { db?: Db } = {}): Container {
-  const db = overrides.db ?? openDatabase();
+  const db = overrides.db ?? createPrisma();
   const tokens = createTokenService();
 
   const auth = createAuthService({

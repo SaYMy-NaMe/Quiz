@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '@/app';
-import { createContainer } from '@/container';
-import { openDatabase } from '@/services/database';
+import { createTestContainer } from '@/test/db';
 import { secureToken, TOKEN_PATTERN } from './token.service';
 
 const payload = {
@@ -26,7 +25,7 @@ describe('share links', () => {
   let agent: ReturnType<typeof request.agent>;
 
   beforeEach(async () => {
-    app = createApp(createContainer({ db: openDatabase(':memory:') }));
+    app = createApp(createTestContainer());
     agent = request.agent(app);
     await agent.post('/api/auth/register').send({ name: 'A', email: 'a@x.io', password: 'password123' });
   });

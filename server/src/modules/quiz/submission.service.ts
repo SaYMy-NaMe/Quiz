@@ -1,10 +1,10 @@
 import type { AnswerMap, Quiz, Submission, SubmissionReason, SubmissionReceipt, Attempt } from '@shared';
 import { SUBMISSION_GRACE_SECONDS } from '@shared';
 import type { ResolvedShare } from '@/modules/share';
-import type { AttemptRepository } from './attempt.repository';
+import { createAttemptRepository, type AttemptRepository } from './attempt.repository';
 import type { GradingStrategy } from './grading.strategy';
 import type { EventBus } from '@/services/event-bus';
-import { transaction, type Db } from '@/services/database';
+import { transaction, type Db } from '@/db/prisma';
 import { notFound } from '@/utils/errors';
 import { newId } from '@/utils/ids';
 import { nowIso, secondsBetween } from '@/utils/time';
@@ -16,8 +16,8 @@ export interface SubmitInput {
 }
 
 export interface SubmissionService {
-  submit(share: ResolvedShare, attemptId: string, input: SubmitInput): SubmissionReceipt;
-  receipt(share: ResolvedShare, attemptId: string): SubmissionReceipt;
+  submit(share: ResolvedShare, attemptId: string, input: SubmitInput): Promise<SubmissionReceipt>;
+  receipt(share: ResolvedShare, attemptId: string): Promise<SubmissionReceipt>;
 }
 
 interface Deps {
@@ -42,18 +42,18 @@ export function createSubmissionService({ db, repo, grading, events }: Deps): Su
     return receipt;
   };
 
-  const loadAttempt = (quiz: Quiz, attemptId: string): Attempt => {
-    const attempt = repo.findAttempt(attemptId);
+  const loadAttempt = async (quiz: Quiz, attemptId: string): Promise<Attempt> => {
+    const attempt = await repo.findAttempt(attemptId);
     if (attempt?.quizId !== quiz.id) throw notFound('Attempt not found');
     return attempt;
   };
 
   return {
-    submit({ quiz }, attemptId, { answers, reason }) {
-      const attempt = loadAttempt(quiz, attemptId);
+    async submit({ quiz }, attemptId, { answers, reason }) {
+      const attempt = await loadAttempt(quiz, attemptId);
 
       // Idempotent: a retried submit (network hiccup, double click) returns the stored result.
-      const existing = repo.findSubmissionByAttempt(attempt.id);
+      const existing = await repo.findSubmissionByAttempt(attempt.id);
       if (existing) return toReceipt(quiz, existing);
 
       const submittedAt = nowIso();
@@ -82,17 +82,18 @@ export function createSubmissionService({ db, repo, grading, events }: Deps): Su
         reason: effectiveReason,
       };
 
-      transaction(db, () => {
-        repo.insertSubmission(submission);
-        repo.markSubmitted(attempt.id);
+      await transaction(db, async (tx) => {
+        const txRepo = createAttemptRepository(tx);
+        await txRepo.insertSubmission(submission);
+        await txRepo.markSubmitted(attempt.id);
       });
       events.emit('submission:created', submission);
       return toReceipt(quiz, submission);
     },
 
-    receipt({ quiz }, attemptId) {
-      const attempt = loadAttempt(quiz, attemptId);
-      const submission = repo.findSubmissionByAttempt(attempt.id);
+    async receipt({ quiz }, attemptId) {
+      const attempt = await loadAttempt(quiz, attemptId);
+      const submission = await repo.findSubmissionByAttempt(attempt.id);
       if (!submission) throw notFound('No submission for this attempt');
       return toReceipt(quiz, submission);
     },

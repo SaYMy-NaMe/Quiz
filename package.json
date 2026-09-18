@@ -1,19 +1,19 @@
 {
-  "name": "quiz-platform",
-  "version": "0.1.0",
+  "name": "quiz-platform-root",
+  "version": "0.2.0",
   "private": true,
-  "description": "Production-grade online quiz platform with timed proctoring, leaderboards, dynamic examinee schemas, Excel reporting and link-exclusive distribution.",
-  "workspaces": [
-    "client",
-    "server"
-  ],
+  "description": "Convenience scripts only. /client and /server are independent apps with their own package.json, lockfile and node_modules — each can be installed, run, tested and deployed on its own.",
   "scripts": {
-    "dev": "concurrently -n server,client -c blue,green \"npm run dev -w server\" \"npm run dev -w client\"",
-    "build": "npm run build -w server && npm run build -w client",
-    "start": "npm run start -w server",
-    "test": "npm run test -w server && npm run test -w client",
-    "typecheck": "npm run typecheck -w server && npm run typecheck -w client",
-    "lint": "eslint ."
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "dev": "concurrently -n server,client -c blue,green \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "build": "npm --prefix server run build && npm --prefix client run build",
+    "test": "npm --prefix server test && npm --prefix client test",
+    "typecheck": "npm --prefix server run typecheck && npm --prefix client run typecheck",
+    "lint": "eslint .",
+    "sync:shared": "node scripts/sync-shared.mjs",
+    "check:shared": "node scripts/sync-shared.mjs --check"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
@@ -24,6 +24,6 @@
     "typescript-eslint": "^8.70.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.5"
   }
 }

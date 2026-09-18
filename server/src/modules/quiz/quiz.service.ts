@@ -12,20 +12,20 @@ export interface TokenIssuer {
 }
 
 export interface QuizService {
-  list(ownerId: string): QuizSummary[];
-  get(ownerId: string, quizId: string): Quiz;
-  create(ownerId: string, input: QuizUpsertInput): Quiz;
-  update(ownerId: string, quizId: string, input: QuizUpsertInput): Quiz;
-  delete(ownerId: string, quizId: string): void;
-  publish(ownerId: string, quizId: string): Quiz;
-  unpublish(ownerId: string, quizId: string): Quiz;
-  close(ownerId: string, quizId: string): Quiz;
-  reopen(ownerId: string, quizId: string): Quiz;
+  list(ownerId: string): Promise<QuizSummary[]>;
+  get(ownerId: string, quizId: string): Promise<Quiz>;
+  create(ownerId: string, input: QuizUpsertInput): Promise<Quiz>;
+  update(ownerId: string, quizId: string, input: QuizUpsertInput): Promise<Quiz>;
+  delete(ownerId: string, quizId: string): Promise<void>;
+  publish(ownerId: string, quizId: string): Promise<Quiz>;
+  unpublish(ownerId: string, quizId: string): Promise<Quiz>;
+  close(ownerId: string, quizId: string): Promise<Quiz>;
+  reopen(ownerId: string, quizId: string): Promise<Quiz>;
   /** Issues a fresh share token; every previously distributed link stops resolving. */
-  rotateShareToken(ownerId: string, quizId: string): Quiz;
+  rotateShareToken(ownerId: string, quizId: string): Promise<Quiz>;
   /** Internal lookup used by share/attempt modules (no ownership check). */
-  findByToken(token: string): Quiz | null;
-  findById(quizId: string): Quiz | null;
+  findByToken(token: string): Promise<Quiz | null>;
+  findById(quizId: string): Promise<Quiz | null>;
 }
 
 interface Deps {
@@ -68,16 +68,16 @@ function buildExamineeFields(fields: QuizUpsertInput['examineeFields']): SchemaF
 }
 
 export function createQuizService({ repo, tokens }: Deps): QuizService {
-  const owned = (ownerId: string, quizId: string): Quiz => {
-    const quiz = repo.findById(quizId);
+  const owned = async (ownerId: string, quizId: string): Promise<Quiz> => {
+    const quiz = await repo.findById(quizId);
     // Non-owners get the same 404 as a missing quiz so ids can't be probed.
     if (quiz?.ownerId !== ownerId) throw notFound('Quiz not found');
     return quiz;
   };
 
-  const transition = (ownerId: string, quizId: string, fn: (quiz: Quiz) => Quiz): Quiz => {
-    const next = { ...fn(owned(ownerId, quizId)), updatedAt: nowIso() };
-    repo.update(next);
+  const transition = async (ownerId: string, quizId: string, fn: (quiz: Quiz) => Quiz): Promise<Quiz> => {
+    const next = { ...fn(await owned(ownerId, quizId)), updatedAt: nowIso() };
+    await repo.update(next);
     return next;
   };
 
@@ -87,7 +87,7 @@ export function createQuizService({ repo, tokens }: Deps): QuizService {
     findByToken: (token) => repo.findByToken(token),
     findById: (id) => repo.findById(id),
 
-    create(ownerId, input) {
+    async create(ownerId, input) {
       const now = nowIso();
       const quiz: Quiz = {
         id: newId(),
@@ -102,12 +102,12 @@ export function createQuizService({ repo, tokens }: Deps): QuizService {
         createdAt: now,
         updatedAt: now,
       };
-      repo.insert(quiz);
+      await repo.insert(quiz);
       return quiz;
     },
 
-    update(ownerId, quizId, input) {
-      const quiz = owned(ownerId, quizId);
+    async update(ownerId, quizId, input) {
+      const quiz = await owned(ownerId, quizId);
       if (!stateOf(quiz).editable) {
         throw conflict('Unpublish the quiz before editing its content');
       }
@@ -120,13 +120,13 @@ export function createQuizService({ repo, tokens }: Deps): QuizService {
         questions: QuestionFactory.createMany(input.questions),
         updatedAt: nowIso(),
       };
-      repo.update(next);
+      await repo.update(next);
       return next;
     },
 
-    delete(ownerId, quizId) {
-      owned(ownerId, quizId);
-      repo.delete(quizId);
+    async delete(ownerId, quizId) {
+      await owned(ownerId, quizId);
+      await repo.delete(quizId);
     },
 
     publish: (o, id) => transition(o, id, (q) => stateOf(q).publish(q, () => tokens.issueShareToken())),

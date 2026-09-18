@@ -19,14 +19,20 @@ export function attachSession(auth: AuthService): RequestHandler {
   return (req, _res, next) => {
     const cookies = req.cookies as Record<string, string | undefined>;
     const sessionId = cookies[SESSION_COOKIE];
-    if (sessionId) {
-      const instructor = auth.resolveSession(sessionId);
-      if (instructor) {
-        req.instructor = instructor;
-        req.sessionId = sessionId;
-      }
+    if (!sessionId) {
+      next();
+      return;
     }
-    next();
+    auth
+      .resolveSession(sessionId)
+      .then((instructor) => {
+        if (instructor) {
+          req.instructor = instructor;
+          req.sessionId = sessionId;
+        }
+        next();
+      })
+      .catch(next);
   };
 }
 

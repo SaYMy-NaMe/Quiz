@@ -1,12 +1,13 @@
 {
-  "name": "@quiz/client",
-  "version": "0.1.0",
+  "name": "quiz-client",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5173",
     "build": "tsc -p tsconfig.json --noEmit && vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --port 5173",
+    "start": "vite preview --port 5173 --host",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "lint": "eslint src"
@@ -29,5 +30,9 @@
     "typescript": "^5.7.3",
     "vite": "^6.0.7",
     "vitest": "^2.1.8"
+  },
+  "description": "Quiz Platform web client (Vite + React). Talks to the API at VITE_API_URL.",
+  "engines": {
+    "node": ">=20"
   }
 }

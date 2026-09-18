@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '@/app';
-import { createContainer } from '@/container';
-import { openDatabase } from '@/services/database';
+import { createTestContainer } from '@/test/db';
 import { QuestionFactory } from './question.factory';
 import { stateOf } from './quiz.state';
 import type { Quiz } from '@shared';
@@ -63,7 +62,7 @@ describe('quiz API', () => {
   let agent: ReturnType<typeof request.agent>;
 
   beforeEach(async () => {
-    app = createApp(createContainer({ db: openDatabase(':memory:') }));
+    app = createApp(createTestContainer());
     agent = request.agent(app);
     await agent.post('/api/auth/register').send({ name: 'A', email: 'a@x.io', password: 'password123' });
   });
@@ -121,7 +120,7 @@ describe('choice images and reveal toggles', () => {
   });
 
   it('hides the score from the receipt when revealScores is off (unless the key is revealed)', async () => {
-    const app = createApp(createContainer({ db: openDatabase(':memory:') }));
+    const app = createApp(createTestContainer());
     const agent = request.agent(app);
     await agent.post('/api/auth/register').send({ name: 'A', email: 'a@x.io', password: 'password123' });
     const run = async (settings: Record<string, boolean>) => {

@@ -7,7 +7,7 @@ import { nowIso } from '@/utils/time';
 
 export interface LeaderboardService {
   /** Instructor view — the only consumer. Examinees never see rankings. */
-  forInstructor(ownerId: string, quizId: string): Leaderboard;
+  forInstructor(ownerId: string, quizId: string): Promise<Leaderboard>;
   /** Pure ranking used by both views and by the reporting module. */
   rank(quiz: Quiz, submissions: Submission[]): Leaderboard;
 }
@@ -41,18 +41,18 @@ export function createLeaderboardService({ quizzes, attempts, strategy, events }
     return { quizId: quiz.id, title: quiz.title, generatedAt: nowIso(), entries };
   };
 
-  const build = (quiz: Quiz): Leaderboard => {
+  const build = async (quiz: Quiz): Promise<Leaderboard> => {
     const cached = cache.get(quiz.id);
     if (cached) return cached;
-    const board = rank(quiz, attempts.listSubmissions(quiz.id));
+    const board = rank(quiz, await attempts.listSubmissions(quiz.id));
     cache.set(quiz.id, board);
     return board;
   };
 
   return {
     rank,
-    forInstructor(ownerId, quizId) {
-      return build(quizzes.get(ownerId, quizId));
+    async forInstructor(ownerId, quizId) {
+      return build(await quizzes.get(ownerId, quizId));
     },
   };
 }

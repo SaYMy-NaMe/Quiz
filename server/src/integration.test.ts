@@ -7,10 +7,9 @@ import { describe, it, expect, beforeAll, vi, afterAll } from 'vitest';
 import request from 'supertest';
 import ExcelJS from 'exceljs';
 import { createApp } from '@/app';
-import { createContainer } from '@/container';
-import { openDatabase } from '@/services/database';
+import { createTestContainer } from '@/test/db';
 
-const container = createContainer({ db: openDatabase(':memory:') });
+const container = createTestContainer();
 const app = createApp(container);
 const instructor = request.agent(app);
 const anon = request(app);
@@ -94,8 +93,7 @@ describe('platform integration', () => {
     const ok = await anon.post(`/api/share/${ctx.token}/attempts/validate`).send({ inviteToken: invite.token, examinee: { name: 'Pre', section: 'A' } });
     expect(ok.status).toBe(200);
     expect(ok.body.examinee.email).toBe(invite.email);
-    const attempts = container.db.prepare('SELECT COUNT(*) AS n FROM attempts').get() as { n: number };
-    expect(attempts.n).toBe(0);
+    expect(await container.db.attempt.count()).toBe(0);
   });
 
   const runExaminee = async (
@@ -197,10 +195,8 @@ describe('platform integration', () => {
     expect((await instructor.delete(`/api/quizzes/${ctx.quizId}`)).status).toBe(204);
     expect((await anon.get(`/api/share/${ctx.token}?invite=${invites[0]!.token}`)).status).toBe(404);
     expect((await instructor.get(`/api/quizzes/${ctx.quizId}/leaderboard`)).status).toBe(404);
-    const count = container.db.prepare('SELECT COUNT(*) AS n FROM submissions').get() as { n: number };
-    expect(count.n).toBe(0);
-    const invitesLeft = container.db.prepare('SELECT COUNT(*) AS n FROM invites').get() as { n: number };
-    expect(invitesLeft.n).toBe(0);
+    expect(await container.db.submission.count()).toBe(0);
+    expect(await container.db.invite.count()).toBe(0);
   });
 
   it('logs out and loses access', async () => {

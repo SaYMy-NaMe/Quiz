@@ -2,8 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import ExcelJS from 'exceljs';
 import { createApp } from '@/app';
-import { createContainer } from '@/container';
-import { openDatabase } from '@/services/database';
+import { createTestContainer } from '@/test/db';
 import { formatHms, safeFilename } from './timestamp';
 
 describe('timestamp helpers', () => {
@@ -19,7 +18,7 @@ describe('Excel export', () => {
   let quizId: string;
 
   beforeEach(async () => {
-    app = createApp(createContainer({ db: openDatabase(':memory:') }));
+    app = createApp(createTestContainer());
     agent = request.agent(app);
     await agent.post('/api/auth/register').send({ name: 'A', email: 'a@x.io', password: 'password123' });
     const created = await agent.post('/api/quizzes').send({

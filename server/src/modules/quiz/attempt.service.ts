@@ -16,9 +16,9 @@ export interface AttemptService {
   /** Step 1: validates examinee metadata against the dynamic schema without opening an attempt. */
   validateExaminee(share: ResolvedShare, examineeInput: unknown): ExamineeRecord;
   /** Step 1 → 2: validates examinee metadata and opens a timed attempt. */
-  start(share: ResolvedShare, examineeInput: unknown): StartedAttempt;
+  start(share: ResolvedShare, examineeInput: unknown): Promise<StartedAttempt>;
   /** Used on page refresh to re-sync the timer against the server clock. */
-  resume(share: ResolvedShare, attemptId: string): StartedAttempt;
+  resume(share: ResolvedShare, attemptId: string): Promise<StartedAttempt>;
 }
 
 export const toPublicQuestions = (quiz: Quiz): PublicQuestion[] =>
@@ -49,7 +49,7 @@ export function createAttemptService(repo: AttemptRepository): AttemptService {
   return {
     validateExaminee: ({ quiz, lockedEmail }, examineeInput) => validate(quiz, examineeInput, lockedEmail),
 
-    start({ quiz, lockedEmail }, examineeInput) {
+    async start({ quiz, lockedEmail }, examineeInput) {
       const examinee = validate(quiz, examineeInput, lockedEmail);
       const startedAt = nowIso();
       const attempt: Attempt = {
@@ -61,12 +61,12 @@ export function createAttemptService(repo: AttemptRepository): AttemptService {
         expiresAt: addSeconds(startedAt, quiz.durationSeconds),
         violations: 0,
       };
-      repo.insertAttempt(attempt);
+      await repo.insertAttempt(attempt);
       return view(quiz, attempt);
     },
 
-    resume({ quiz }, attemptId) {
-      const attempt = repo.findAttempt(attemptId);
+    async resume({ quiz }, attemptId) {
+      const attempt = await repo.findAttempt(attemptId);
       if (attempt?.quizId !== quiz.id) throw notFound('Attempt not found');
       return view(quiz, attempt);
     },

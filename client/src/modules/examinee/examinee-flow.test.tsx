@@ -8,6 +8,7 @@ import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { routes } from '@/router/routes';
 import { useAttemptStore } from '@/store/attempt.store';
 import { useTimerStore } from '@/store/timer.store';
+import { config } from '@/config';
 
 const TOKEN = 'AbCdEfGhIjKlMnOpQrStUv';
 const quiz = {
@@ -31,7 +32,9 @@ let exitFullscreen = vi.fn(() => Promise.resolve());
 const json = (body: unknown, status = 200) => Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }));
 
 function fakeFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-  const url = input instanceof URL ? input.href : typeof input === 'string' ? input : input.url;
+  const raw = input instanceof URL ? input.href : typeof input === 'string' ? input : input.url;
+  // Requests are absolute when VITE_API_URL is set; normalise to the API-relative path.
+  const url = config.apiOrigin && raw.startsWith(config.apiOrigin) ? raw.slice(config.apiOrigin.length) : raw;
   const method = init?.method ?? 'GET';
   const body = typeof init?.body === 'string' ? (JSON.parse(init.body) as unknown) : null;
   calls.push({ method, url, body, headers: (init?.headers as Record<string, string> | undefined) ?? {} });

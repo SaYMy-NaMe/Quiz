@@ -7,6 +7,7 @@ import { HttpError } from '@/services/http';
  */
 export async function downloadSubmissionsXlsx(quizId: string, fallbackName = 'submissions.xlsx'): Promise<void> {
   const res = await fetch(`${config.apiBaseUrl}/quizzes/${quizId}/export/xlsx`, { credentials: 'include' });
+  // (credentials: 'include' + CORS with CLIENT_ORIGIN lets this work cross-origin as well.)
   if (!res.ok) {
     let message = res.statusText;
     try {
