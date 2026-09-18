@@ -39,7 +39,9 @@ export function createAttemptService(repo: AttemptRepository): AttemptService {
   });
 
   const validate = (quiz: Quiz, examineeInput: unknown, lockedEmail: string | undefined): ExamineeRecord => {
-    const result = validateExaminee(quiz.examineeFields, examineeInput);
+    // Invite-locked emails are supplied by the server, so the examinee never has to (and cannot) provide them.
+    const input = typeof examineeInput === 'object' && examineeInput !== null ? (examineeInput as Record<string, unknown>) : {};
+    const result = validateExaminee(quiz.examineeFields, applyLockedEmail(quiz, input as ExamineeRecord, lockedEmail));
     if (!result.success || !result.data) throw badRequest('Please correct the highlighted fields', { fieldErrors: result.errors });
     return applyLockedEmail(quiz, result.data, lockedEmail);
   };
