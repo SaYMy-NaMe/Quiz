@@ -7,6 +7,7 @@ import { env } from '@/config/env';
 import { logger } from '@/services/logger';
 import { errorHandler } from '@/middleware/error-handler';
 import type { Container } from '@/container';
+import { attachSession, createAuthRouter } from '@/modules/auth';
 
 export function createApp(container: Container): express.Express {
   const app = express();
@@ -25,7 +26,8 @@ export function createApp(container: Container): express.Express {
     res.json({ ok: true, uptime: process.uptime() });
   });
 
-  void container;
+  app.use(attachSession(container.auth));
+  app.use('/api/auth', createAuthRouter(container.auth));
 
   app.use('/api', (_req, res) => {
     res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Not found' } });
