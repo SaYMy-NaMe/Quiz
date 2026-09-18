@@ -17,7 +17,6 @@ const baseQuiz = (): Quiz => ({
   durationSeconds: 60,
   revealAnswers: false,
   revealScores: true,
-  leaderboardVisible: true,
   accessMode: 'public',
   examineeFields: [],
   questions: [QuestionFactory.create({ prompt: 'p', promptType: 'text', options: [{ text: 'a' }, { text: 'b' }], correctIndex: 0 })],

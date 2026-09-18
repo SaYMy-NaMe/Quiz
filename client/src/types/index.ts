@@ -57,7 +57,6 @@ export interface QuizDraft {
     durationSeconds: number;
     revealScores: boolean;
     revealAnswers: boolean;
-    leaderboardVisible: boolean;
     accessMode: 'public' | 'restricted';
   };
   examineeFields: DraftSchemaField[];

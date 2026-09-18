@@ -42,14 +42,6 @@ export function QuizSettingsForm({ errors = {} }: { errors?: Record<string, stri
         </span>
       </label>
 
-      <label className="switch">
-        <input type="checkbox" checked={settings.leaderboardVisible} onChange={(e) => setSettings({ leaderboardVisible: e.target.checked })} />
-        <span>
-          <strong>Leaderboard visible to examinees</strong>
-          <br />
-          <span className="muted small">You can toggle this at any time from the dashboard.</span>
-        </span>
-      </label>
 
       <div className="field">
         <span className="field__label">Access mode</span>

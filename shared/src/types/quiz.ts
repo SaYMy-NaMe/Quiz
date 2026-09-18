@@ -10,7 +10,6 @@ export interface QuizSettings {
   revealScores: boolean;
   /** Show the examinee the answer key (implies the score is visible). */
   revealAnswers: boolean;
-  leaderboardVisible: boolean;
   accessMode: AccessMode;
 }
 
@@ -50,7 +49,6 @@ export interface PublicQuiz {
   title: string;
   description: string;
   durationSeconds: number;
-  leaderboardVisible: boolean;
   accessMode: AccessMode;
   examineeFields: SchemaField[];
   questionCount: number;

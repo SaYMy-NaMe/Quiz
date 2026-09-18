@@ -1,11 +1,8 @@
 import { Router } from 'express';
-import { z } from 'zod';
 import type { QuizService } from './quiz.service';
 import { QuizUpsertSchema } from './quiz.schemas';
 import { requireInstructor } from '@/modules/auth';
 import { validateBody, bodyOf } from '@/middleware/validate';
-
-const VisibilitySchema = z.object({ visible: z.boolean() });
 
 export function createQuizRouter(quizzes: QuizService): Router {
   const router = Router();
@@ -41,10 +38,6 @@ export function createQuizRouter(quizzes: QuizService): Router {
   router.post('/:id/reopen', (req, res) => res.json({ quiz: quizzes.reopen(owner(req), id(req)) }));
 
   router.post('/:id/rotate-token', (req, res) => res.json({ quiz: quizzes.rotateShareToken(owner(req), id(req)) }));
-
-  router.patch('/:id/leaderboard-visibility', validateBody(VisibilitySchema), (req, res) => {
-    res.json({ quiz: quizzes.setLeaderboardVisibility(owner(req), id(req), bodyOf(req, VisibilitySchema).visible) });
-  });
 
   return router;
 }

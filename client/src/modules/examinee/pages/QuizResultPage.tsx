@@ -82,9 +82,6 @@ export function Component() {
           <div className="stat"><div className="stat__value small" style={{ fontSize: '1rem' }}>{formatTimestamp(receipt.submittedAt)}</div><div className="stat__label">Submitted</div></div>
         </div>
         <p className="muted small" style={{ marginTop: '0.75rem' }}>{REASON_LABEL[receipt.reason]}</p>
-        {quiz.leaderboardVisible && (
-          <Link className="btn" to={`/quiz/v/${token}/leaderboard${invite ? `?invite=${encodeURIComponent(invite)}` : ''}`}>View leaderboard</Link>
-        )}
       </div>
 
       {receipt.breakdown ? (

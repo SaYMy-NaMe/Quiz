@@ -41,7 +41,7 @@ describe('editor store', () => {
 
     const quiz: Quiz = {
       id: 'q', ownerId: 'o', title: 'Mapped', description: '', status: 'draft', shareToken: null, durationSeconds: 600,
-      revealScores: true, revealAnswers: false, leaderboardVisible: true, accessMode: 'public',
+      revealScores: true, revealAnswers: false, accessMode: 'public',
       examineeFields: [{ fieldId: 'section', label: 'Section', type: 'select', required: true, options: ['A', 'B'] }],
       questions: [{ id: 'q1', prompt: 'Pick', promptType: 'text', options: [{ id: 'o1', text: 'A' }, { id: 'o2', text: 'B' }], correctOptionId: 'o2', points: 1 }],
       createdAt: '', updatedAt: '',

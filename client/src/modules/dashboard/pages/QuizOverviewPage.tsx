@@ -6,7 +6,7 @@ import { Spinner } from '@/components/Spinner';
 import { quizApi } from '@/modules/builder/services/quiz.api';
 import type { Quiz } from '@/types';
 import { ShareLinkPanel } from '@/modules/share';
-import { leaderboardApi, useLeaderboard, LeaderboardTable, VisibilityToggle } from '@/modules/leaderboard';
+import { leaderboardApi, useLeaderboard, LeaderboardTable } from '@/modules/leaderboard';
 import { ExportButton } from '@/modules/reporting';
 import { dashboardApi } from '../services/dashboard.api';
 import { AnalyticsPanel } from '../components/AnalyticsPanel';
@@ -104,9 +104,7 @@ export function Component() {
         )}
         {tab === 'leaderboard' && (
           <div className="stack">
-            <div className="card card--flat">
-              <VisibilityToggle quiz={quiz} onChange={setQuiz} />
-            </div>
+            <p className="small muted">Instructor-only. Examinees never see rankings. Ordered by score, then fastest time, then earliest submission.</p>
             {board.loading && <Spinner label="Loading leaderboard…" />}
             {board.board && (
               <LeaderboardTable board={board.board} extraColumns={quiz.examineeFields.map((f) => ({ fieldId: f.fieldId, label: f.label }))} />

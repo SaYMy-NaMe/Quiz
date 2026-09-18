@@ -50,7 +50,6 @@ export function createShareService({ quizzes, invites, strategies, tokens }: Dep
         title: quiz.title,
         description: quiz.description,
         durationSeconds: quiz.durationSeconds,
-        leaderboardVisible: quiz.leaderboardVisible,
         accessMode: quiz.accessMode,
         examineeFields: quiz.examineeFields,
         questionCount: quiz.questions.length,

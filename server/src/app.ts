@@ -11,7 +11,7 @@ import { attachSession, createAuthRouter } from '@/modules/auth';
 import { createQuizRouter, createUploadRouter, createAttemptRouter } from '@/modules/quiz';
 import { createShareRouter, createInviteRouter } from '@/modules/share';
 import { createProctorRouter } from '@/modules/proctor';
-import { createInstructorLeaderboardRouter, createPublicLeaderboardRouter } from '@/modules/leaderboard';
+import { createInstructorLeaderboardRouter } from '@/modules/leaderboard';
 import { createReportingRouter } from '@/modules/reporting';
 import { createDashboardRouter } from '@/modules/dashboard';
 import path from 'node:path';
@@ -46,7 +46,6 @@ export function createApp(container: Container): express.Express {
   app.use('/api/quizzes', createQuizRouter(container.quizzes));
   app.use('/api/share/:token/attempts/:attemptId/violations', createProctorRouter(container.share, container.proctor));
   app.use('/api/share/:token/attempts', createAttemptRouter(container.share, container.attempts, container.submissions));
-  app.use('/api/share/:token/leaderboard', createPublicLeaderboardRouter(container.share, container.leaderboard));
   app.use('/api/share', createShareRouter(container.share));
   app.use('/api/uploads', createUploadRouter(env.UPLOAD_DIR));
   app.use(
