@@ -26,6 +26,7 @@ interface EditorState {
   setCorrect: (questionKey: string, optionKey: string) => void;
   addField: () => void;
   removeField: (key: string) => void;
+  duplicateField: (key: string) => void;
   moveField: (key: string, direction: -1 | 1) => void;
   updateField: (key: string, patch: Partial<Omit<DraftSchemaField, 'key'>>) => void;
   markSaved: (quiz: Quiz) => void;
@@ -91,6 +92,16 @@ export const useEditorStore = create<EditorState>((set) => {
         dirty: true,
         draft: { ...s.draft, examineeFields: s.draft.examineeFields.filter((f) => f.key !== key) },
       })),
+    duplicateField: (key) =>
+      set((s) => {
+        const i = s.draft.examineeFields.findIndex((f) => f.key === key);
+        const src = s.draft.examineeFields[i];
+        if (!src) return s;
+        const copy: DraftSchemaField = { ...src, key: DraftFactory.schemaField().key, fieldId: `${src.fieldId}_copy`, label: `${src.label} (copy)` };
+        const examineeFields = [...s.draft.examineeFields];
+        examineeFields.splice(i + 1, 0, copy);
+        return { dirty: true, draft: { ...s.draft, examineeFields } };
+      }),
     moveField: (key, dir) =>
       set((s) => ({ dirty: true, draft: { ...s.draft, examineeFields: move(s.draft.examineeFields, key, dir) } })),
     updateField: (key, patch) =>

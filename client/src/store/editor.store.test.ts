@@ -58,3 +58,20 @@ describe('editor store', () => {
     expect(errors.questions[state().draft.questions[0]!.key]?.prompt).toBeTruthy();
   });
 });
+
+describe('examinee schema fields', () => {
+  it('adds, duplicates, reorders and removes fields', () => {
+    useEditorStore.getState().reset();
+    const s = () => useEditorStore.getState();
+    s().addField();
+    const a = s().draft.examineeFields[0]!;
+    s().updateField(a.key, { fieldId: 'section', label: 'Section', type: 'select', options: ['A'] });
+    s().duplicateField(a.key);
+    expect(s().draft.examineeFields).toHaveLength(2);
+    expect(s().draft.examineeFields[1]).toMatchObject({ fieldId: 'section_copy', label: 'Section (copy)', type: 'select', options: ['A'] });
+    s().moveField(s().draft.examineeFields[1]!.key, -1);
+    expect(s().draft.examineeFields[0]!.fieldId).toBe('section_copy');
+    s().removeField(a.key);
+    expect(s().draft.examineeFields).toHaveLength(1);
+  });
+});
