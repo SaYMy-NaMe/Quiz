@@ -2,6 +2,7 @@ import type { Writable } from 'node:stream';
 import type { AttemptRepository, QuizService } from '@/modules/quiz';
 import type { LeaderboardService } from '@/modules/leaderboard';
 import { writeSubmissionsWorkbook } from './excel.exporter';
+import { computeAnalytics } from '@/modules/dashboard';
 import { safeFilename } from './timestamp';
 
 export interface PreparedExport {
@@ -31,7 +32,7 @@ export function createReportingService({ quizzes, attempts, leaderboard }: Deps)
         async write(out) {
           const submissions = attempts.listSubmissions(quiz.id);
           const board = leaderboard.rank(quiz, submissions);
-          await writeSubmissionsWorkbook(out, { quiz, submissions, leaderboard: board });
+          await writeSubmissionsWorkbook(out, { quiz, submissions, leaderboard: board, analytics: computeAnalytics(quiz, submissions) });
         },
       };
     },

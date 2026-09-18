@@ -68,6 +68,15 @@ describe('Excel export', () => {
 
     const answers = wb.getWorksheet('Answers')!;
     expect(answers.rowCount).toBe(3);
+
+    const summary = wb.getWorksheet('Summary')!;
+    const rows = summary.getSheetValues() as unknown[][];
+    const find = (label: string) => rows.find((r) => r?.[1] === label)?.[2];
+    expect(find('Quiz')).toBe('Export Me');
+    expect(find('Submissions')).toBe(2);
+    expect(find('Average Percent')).toBe(50);
+    expect(String(find('Exported At (ISO-8601)'))).toMatch(/Z$/);
+    expect(String(rows.at(-1)?.[2])).toBe("50% · 1 / 1");
     expect((answers.getRow(2).values as unknown[]).slice(1)).toContain('Paris');
   });
 
