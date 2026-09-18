@@ -17,6 +17,7 @@ const payload = {
 
 describe('attempt start / resume', () => {
   let app: ReturnType<typeof createApp>;
+  let container: ReturnType<typeof createContainer>;
   let agent: ReturnType<typeof request.agent>;
   let token: string;
   let quizId: string;
@@ -29,7 +30,8 @@ describe('attempt start / resume', () => {
   };
 
   beforeEach(async () => {
-    app = createApp(createContainer({ db: openDatabase(':memory:') }));
+    container = createContainer({ db: openDatabase(':memory:') });
+    app = createApp(container);
     agent = request.agent(app);
     await agent.post('/api/auth/register').send({ name: 'A', email: 'a@x.io', password: 'password123' });
   });
@@ -53,6 +55,18 @@ describe('attempt start / resume', () => {
     expect(resumed.status).toBe(200);
     expect(resumed.body.attempt.id).toBe(ok.body.attempt.id);
     expect((await request(app).get(`/api/share/${token}/attempts/unknown`)).status).toBe(404);
+  });
+
+  it('validates step-1 metadata without creating an attempt', async () => {
+    await setup();
+    const bad = await request(app).post(`/api/share/${token}/attempts/validate`).send({ examinee: { name: '' } });
+    expect(bad.status).toBe(400);
+    expect(bad.body.error.details.fieldErrors.name).toMatch(/required/);
+    const ok = await request(app).post(`/api/share/${token}/attempts/validate`).send({ examinee: { name: 'Stu', email: 'S@X.io', junk: 1 } });
+    expect(ok.status).toBe(200);
+    expect(ok.body.examinee).toEqual({ name: 'Stu', email: 's@x.io' });
+    const count = container.db.prepare('SELECT COUNT(*) AS n FROM attempts').get() as { n: number };
+    expect(count.n).toBe(0);
   });
 
   it('pins the email to the invite on restricted quizzes', async () => {

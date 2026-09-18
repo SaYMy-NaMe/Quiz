@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { localStore } from '@/services/storage';
-import type { AnswerMap, Attempt, PublicQuestion, SubmissionReceipt } from '@/types';
+import type { AnswerMap, Attempt, ExamineeRecord, PublicQuestion, SubmissionReceipt } from '@/types';
 
 /**
  * Runtime state of an examinee's attempt. Persisted to localStorage per share
@@ -26,6 +26,10 @@ interface AttemptState {
   clockOffsetMs: number;
   receipt: SubmissionReceipt | null;
   hydrate: (token: string) => PersistedAttempt | null;
+  /** Step 1 → 2 hand-off: validated metadata waiting for "Start Quiz". */
+  setPendingExaminee: (token: string, quizId: string, examinee: ExamineeRecord) => void;
+  getPendingExaminee: (token: string, quizId: string) => ExamineeRecord | null;
+  clearPendingExaminee: (token: string) => void;
   begin: (token: string, attempt: Attempt, questions: PublicQuestion[], serverTime: string) => void;
   restore: (token: string, attempt: Attempt, questions: PublicQuestion[], serverTime: string, persisted: PersistedAttempt) => void;
   answer: (questionId: string, optionId: string) => void;
@@ -37,6 +41,12 @@ interface AttemptState {
 }
 
 const key = (token: string) => `attempt:${token}`;
+const pendingKey = (token: string) => `pending:${token}`;
+
+interface PendingExaminee {
+  quizId: string;
+  examinee: ExamineeRecord;
+}
 
 export const useAttemptStore = create<AttemptState>((set, get) => {
   const persist = () => {
@@ -63,6 +73,13 @@ export const useAttemptStore = create<AttemptState>((set, get) => {
     receipt: null,
 
     hydrate: (token) => localStore.get<PersistedAttempt>(key(token)),
+
+    setPendingExaminee: (token, quizId, examinee) => localStore.set<PendingExaminee>(pendingKey(token), { quizId, examinee }),
+    getPendingExaminee: (token, quizId) => {
+      const p = localStore.get<PendingExaminee>(pendingKey(token));
+      return p?.quizId === quizId ? p.examinee : null;
+    },
+    clearPendingExaminee: (token) => localStore.remove(pendingKey(token)),
 
     begin(token, attempt, questions, serverTime) {
       set({ token, attempt, questions, answers: {}, receipt: null, clockOffsetMs: new Date(serverTime).getTime() - Date.now() });
@@ -109,6 +126,7 @@ export const useAttemptStore = create<AttemptState>((set, get) => {
 
     clear(token) {
       localStore.remove(key(token));
+      localStore.remove(pendingKey(token));
       set({ token: null, attempt: null, questions: [], answers: {}, receipt: null });
     },
   };
