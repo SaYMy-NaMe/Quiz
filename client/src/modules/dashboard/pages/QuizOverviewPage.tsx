@@ -11,10 +11,11 @@ import { ExportButton } from '@/modules/reporting';
 import { dashboardApi } from '../services/dashboard.api';
 import { AnalyticsPanel } from '../components/AnalyticsPanel';
 import { LifecycleActions } from '../components/LifecycleActions';
+import { ResponsesPanel } from '../components/ResponsesPanel';
 import { DeleteQuizModal } from '../components/DeleteQuizModal';
 import { formatDuration } from '@/utils/format';
 
-type Tab = 'share' | 'leaderboard' | 'analytics';
+type Tab = 'share' | 'responses' | 'leaderboard' | 'analytics';
 
 export function Component() {
   const { id = '' } = useParams<{ id: string }>();
@@ -87,6 +88,7 @@ export function Component() {
           {(
             [
               ['share', 'Share'],
+              ['responses', `Responses (${analytics.submissionCount})`],
               ['leaderboard', `Leaderboard (${board.board?.entries.length ?? 0})`],
               ['analytics', 'Analytics'],
             ] as const
@@ -102,6 +104,7 @@ export function Component() {
             <ShareLinkPanel quiz={quiz} onQuizChange={setQuiz} />
           </div>
         )}
+        {tab === 'responses' && <ResponsesPanel quiz={quiz} version={entryCount} />}
         {tab === 'leaderboard' && (
           <div className="stack">
             <p className="small muted">Instructor-only. Examinees never see rankings. Ordered by score, then fastest time, then earliest submission.</p>

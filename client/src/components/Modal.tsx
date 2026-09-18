@@ -4,9 +4,10 @@ interface ModalProps {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  wide?: boolean;
 }
 
-export function Modal({ title, onClose, children }: ModalProps) {
+export function Modal({ title, onClose, children, wide = false }: ModalProps) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -19,7 +20,7 @@ export function Modal({ title, onClose, children }: ModalProps) {
 
   return (
     <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" ref={ref}>
+      <div className={wide ? 'modal modal--wide' : 'modal'} role="dialog" aria-modal="true" aria-labelledby="modal-title" ref={ref}>
         <h2 id="modal-title">{title}</h2>
         {children}
       </div>
