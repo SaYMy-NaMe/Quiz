@@ -1,14 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '@/app';
-import { createContainer } from '@/container';
-import { openDatabase } from '@/services/database';
+import { createTestContainer } from '@/test/db';
 
 describe('auth module', () => {
   let app: ReturnType<typeof createApp>;
 
   beforeEach(() => {
-    app = createApp(createContainer({ db: openDatabase(':memory:') }));
+    app = createApp(createTestContainer());
   });
 
   it('registers, returns a session cookie and resolves /me', async () => {

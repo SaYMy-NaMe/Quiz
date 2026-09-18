@@ -1,15 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '@/app';
-import { createContainer } from '@/container';
-import { openDatabase } from '@/services/database';
+import { createTestContainer } from '@/test/db';
 
 describe('background grading engine', () => {
   let app: ReturnType<typeof createApp>;
   let agent: ReturnType<typeof request.agent>;
 
   beforeEach(async () => {
-    app = createApp(createContainer({ db: openDatabase(':memory:') }));
+    app = createApp(createTestContainer());
     agent = request.agent(app);
     await agent.post('/api/auth/register').send({ name: 'A', email: 'a@x.io', password: 'password123' });
   });

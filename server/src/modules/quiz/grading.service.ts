@@ -1,9 +1,9 @@
 import type { Quiz } from '@shared';
-import type { AttemptRepository } from './attempt.repository';
+import { createAttemptRepository, type AttemptRepository } from './attempt.repository';
 import type { GradingStrategy } from './grading.strategy';
 import type { QuizService } from './quiz.service';
 import type { EventBus } from '@/services/event-bus';
-import { transaction, type Db } from '@/services/database';
+import { transaction, type Db } from '@/db/prisma';
 
 export interface RegradeResult {
   quizId: string;
@@ -17,7 +17,7 @@ export interface RegradeResult {
  * corrected an answer key (unpublish → edit → republish → regrade).
  */
 export interface GradingService {
-  regrade(ownerId: string, quizId: string): RegradeResult;
+  regrade(ownerId: string, quizId: string): Promise<RegradeResult>;
 }
 
 interface Deps {
@@ -30,15 +30,16 @@ interface Deps {
 
 export function createGradingService({ db, quizzes, repo, grading, events }: Deps): GradingService {
   return {
-    regrade(ownerId, quizId) {
-      const quiz: Quiz = quizzes.get(ownerId, quizId);
-      const submissions = repo.listSubmissions(quiz.id);
+    async regrade(ownerId, quizId) {
+      const quiz: Quiz = await quizzes.get(ownerId, quizId);
+      const submissions = await repo.listSubmissions(quiz.id);
       let changed = 0;
-      transaction(db, () => {
+      await transaction(db, async (tx) => {
+        const txRepo = createAttemptRepository(tx);
         for (const s of submissions) {
           const { score, maxScore } = grading.grade(quiz.questions, s.answers);
           if (score !== s.score || maxScore !== s.maxScore) {
-            repo.updateScore(s.id, score, maxScore);
+            await txRepo.updateScore(s.id, score, maxScore);
             changed += 1;
           }
         }

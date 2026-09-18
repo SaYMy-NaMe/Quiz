@@ -1,17 +1,16 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '@/app';
-import { createContainer } from '@/container';
-import { openDatabase } from '@/services/database';
+import { createTestContainer } from '@/test/db';
 
 describe('proctoring violations', () => {
   let app: ReturnType<typeof createApp>;
   let token: string;
   let attemptId: string;
-  let container: ReturnType<typeof createContainer>;
+  let container: ReturnType<typeof createTestContainer>;
 
   beforeEach(async () => {
-    container = createContainer({ db: openDatabase(':memory:') });
+    container = createTestContainer();
     app = createApp(container);
     const agent = request.agent(app);
     await agent.post('/api/auth/register').send({ name: 'A', email: 'a@x.io', password: 'password123' });

@@ -2,8 +2,8 @@ import type { Quiz, QuizAnalytics, Submission } from '@shared';
 import type { AttemptRepository, QuizService } from '@/modules/quiz';
 
 export interface AnalyticsService {
-  forQuiz(ownerId: string, quizId: string): QuizAnalytics;
-  listSubmissions(ownerId: string, quizId: string): Submission[];
+  forQuiz(ownerId: string, quizId: string): Promise<QuizAnalytics>;
+  listSubmissions(ownerId: string, quizId: string): Promise<Submission[]>;
 }
 
 const round = (n: number) => Math.round(n * 100) / 100;
@@ -55,12 +55,12 @@ export function computeAnalytics(quiz: Quiz, submissions: Submission[]): QuizAna
 
 export function createAnalyticsService(quizzes: QuizService, attempts: AttemptRepository): AnalyticsService {
   return {
-    forQuiz(ownerId, quizId) {
-      const quiz = quizzes.get(ownerId, quizId);
-      return computeAnalytics(quiz, attempts.listSubmissions(quiz.id));
+    async forQuiz(ownerId, quizId) {
+      const quiz = await quizzes.get(ownerId, quizId);
+      return computeAnalytics(quiz, await attempts.listSubmissions(quiz.id));
     },
-    listSubmissions(ownerId, quizId) {
-      const quiz = quizzes.get(ownerId, quizId);
+    async listSubmissions(ownerId, quizId) {
+      const quiz = await quizzes.get(ownerId, quizId);
       return attempts.listSubmissions(quiz.id);
     },
   };

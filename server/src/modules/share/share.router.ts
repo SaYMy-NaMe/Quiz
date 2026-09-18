@@ -4,6 +4,7 @@ import type { ShareService } from './share.service';
 import { resolveShare } from './share.middleware';
 import { requireInstructor } from '@/modules/auth';
 import { validateBody, bodyOf } from '@/middleware/validate';
+import { asyncHandler } from '@/middleware/async-handler';
 
 const AddInvitesSchema = z.object({
   emails: z.array(z.string().trim().email().max(200)).min(1).max(500),
@@ -26,15 +27,25 @@ export function createInviteRouter(share: ShareService): Router {
   const owner = (req: import('express').Request) => req.instructor!.id;
   const quizId = (req: import('express').Request) => String(req.params.id);
 
-  router.get('/', (req, res) => {
-    res.json({ invites: share.listInvites(owner(req), quizId(req)) });
-  });
-  router.post('/', validateBody(AddInvitesSchema), (req, res) => {
-    res.status(201).json({ invites: share.addInvites(owner(req), quizId(req), bodyOf(req, AddInvitesSchema).emails) });
-  });
-  router.delete('/:inviteId', (req, res) => {
-    share.removeInvite(owner(req), quizId(req), req.params.inviteId ?? '');
-    res.status(204).end();
-  });
+  router.get(
+    '/',
+    asyncHandler(async (req, res) => {
+      res.json({ invites: await share.listInvites(owner(req), quizId(req)) });
+    }),
+  );
+  router.post(
+    '/',
+    validateBody(AddInvitesSchema),
+    asyncHandler(async (req, res) => {
+      res.status(201).json({ invites: await share.addInvites(owner(req), quizId(req), bodyOf(req, AddInvitesSchema).emails) });
+    }),
+  );
+  router.delete(
+    '/:inviteId',
+    asyncHandler(async (req, res) => {
+      await share.removeInvite(owner(req), quizId(req), req.params.inviteId ?? '');
+      res.status(204).end();
+    }),
+  );
   return router;
 }

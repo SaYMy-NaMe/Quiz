@@ -4,7 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/node_modules/**', 'eslint.config.js', '**/vite.config.ts', '**/vitest.config.ts'] },
+  { ignores: ['**/dist/**', '**/node_modules/**', 'eslint.config.js', '**/vite.config.ts', '**/vitest.config.ts', 'server/prisma/**', 'scripts/**'] },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,

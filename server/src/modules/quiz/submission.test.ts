@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '@/app';
-import { createContainer } from '@/container';
-import { openDatabase } from '@/services/database';
+import { createTestContainer } from '@/test/db';
 import { StandardGradingStrategy, NegativeMarkingStrategy } from './grading.strategy';
 import { QuestionFactory } from './question.factory';
 
@@ -51,7 +50,7 @@ describe('submission pipeline', () => {
   };
 
   beforeEach(async () => {
-    app = createApp(createContainer({ db: openDatabase(':memory:') }));
+    app = createApp(createTestContainer());
     agent = request.agent(app);
     await agent.post('/api/auth/register').send({ name: 'A', email: 'a@x.io', password: 'password123' });
   });

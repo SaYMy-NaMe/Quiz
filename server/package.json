@@ -4,14 +4,20 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "NODE_OPTIONS=--no-warnings=ExperimentalWarning tsx watch --clear-screen=false src/index.ts",
-    "build": "tsc -p tsconfig.json --noEmit",
-    "start": "NODE_ENV=production NODE_OPTIONS=--no-warnings=ExperimentalWarning tsx src/index.ts",
+    "dev": "NODE_OPTIONS=--no-warnings tsx watch --clear-screen=false src/index.ts",
+    "start": "NODE_ENV=production tsx src/index.ts",
+    "build": "prisma generate && tsc -p tsconfig.json --noEmit",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:reset": "prisma migrate reset --force",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -22,6 +28,7 @@
     "nanoid": "^5.0.9",
     "pino": "^9.6.0",
     "pino-http": "^10.4.0",
+    "prisma": "^6.19.3",
     "zod": "^3.24.1"
   },
   "devDependencies": {

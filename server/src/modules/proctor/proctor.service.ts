@@ -16,18 +16,18 @@ export interface ViolationReport {
 }
 
 export interface ProctorService {
-  record(share: ResolvedShare, attemptId: string, kind: ViolationKind): ViolationReport;
+  record(share: ResolvedShare, attemptId: string, kind: ViolationKind): Promise<ViolationReport>;
 }
 
 export function createProctorService(repo: AttemptRepository, events: EventBus): ProctorService {
   return {
-    record({ quiz }, attemptId, kind) {
-      const attempt = repo.findAttempt(attemptId);
+    async record({ quiz }, attemptId, kind) {
+      const attempt = await repo.findAttempt(attemptId);
       if (attempt?.quizId !== quiz.id) throw notFound('Attempt not found');
       if (attempt.status === 'submitted') {
         return { violations: attempt.violations, threshold: VIOLATION_THRESHOLD, shouldSubmit: false };
       }
-      const violations = repo.incrementViolations(attempt.id, kind, nowIso(), newId());
+      const violations = await repo.incrementViolations(attempt.id, kind, nowIso(), newId());
       events.emit('attempt:violation', { attemptId: attempt.id, quizId: quiz.id, violations, kind });
       return { violations, threshold: VIOLATION_THRESHOLD, shouldSubmit: violations >= VIOLATION_THRESHOLD };
     },

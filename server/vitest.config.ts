@@ -11,6 +11,9 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts'],
-    env: { NODE_ENV: 'test', DATABASE_PATH: ':memory:' },
+    env: { NODE_ENV: 'test' },
+    globalSetup: ['src/test/global-setup.ts'],
+    // Prisma's engine handles one SQLite file per client; files never share a database.
+    fileParallelism: true,
   },
 });

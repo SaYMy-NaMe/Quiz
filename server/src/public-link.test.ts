@@ -8,15 +8,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createApp } from '@/app';
-import { createContainer } from '@/container';
-import { openDatabase } from '@/services/database';
+import { createTestContainer } from '@/test/db';
 
 const dist = fs.mkdtempSync(path.join(os.tmpdir(), 'quiz-dist-'));
 fs.writeFileSync(path.join(dist, 'index.html'), '<!doctype html><div id="root"></div>');
 fs.mkdirSync(path.join(dist, 'assets'));
 fs.writeFileSync(path.join(dist, 'assets', 'app.js'), 'console.log(1)');
 
-const container = createContainer({ db: openDatabase(':memory:') });
+const container = createTestContainer();
 const app = createApp(container, { clientDist: dist });
 let token = '';
 

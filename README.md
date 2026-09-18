@@ -7,74 +7,108 @@ link-exclusive distribution.
 
 ## Stack
 
-| Layer    | Technology                                                                    |
+| App      | Technology                                                                    |
 |----------|-------------------------------------------------------------------------------|
-| Client   | Vite · React 18 · TypeScript (strict) · react-router (lazy routes) · Zustand · Zod |
-| Server   | Express · TypeScript (strict) · `node:sqlite` (zero native deps) · Zod · exceljs · pino |
-| Shared   | Domain contracts + the examinee schema builder, consumed as TS source via `@shared` |
-| Tooling  | npm workspaces · vitest · supertest · ESLint (typescript-eslint strict, type-checked) |
+| `client/` | Vite · React 18 · TypeScript (strict) · react-router (lazy routes) · Zustand · Zod |
+| `server/` | Express · TypeScript (strict) · **Prisma** (SQLite locally, PostgreSQL/Supabase-ready) · Zod · exceljs · pino |
+| root     | convenience scripts + type-aware ESLint only — no workspace, no shared dependencies |
 
-Requires **Node ≥ 22.5** (built-in SQLite). Developed on Node 24.
+`client/` and `server/` are **independent applications**: each has its own `package.json`,
+lockfile, `node_modules`, `tsconfig`, `.env` and start scripts, and each can be installed, run,
+tested and deployed on its own. Requires Node ≥ 22.5 for the server (Node ≥ 20 for the client).
 
-## Getting started
+## Directory structure
+
+```
+Quiz/
+├── package.json            root convenience scripts (npm --prefix …), ESLint config
+├── scripts/sync-shared.mjs mirrors server/src/shared → client/src/shared (--check detects drift)
+├── client/                 ───────── independent web app ─────────
+│   ├── package.json  package-lock.json  node_modules/
+│   ├── .env.example  .env              VITE_API_URL → backend origin
+│   ├── vite.config.ts  tsconfig.json  tsconfig.base.json
+│   ├── public/_redirects       SPA fallback for static hosts
+│   └── src/
+│       ├── shared/             vendored domain contracts (mirror of server/src/shared)
+│       ├── config/index.ts     apiBaseUrl / assetUrl from VITE_API_URL
+│       ├── modules/            auth · builder · dashboard · examinee · leaderboard · proctor · reporting · share
+│       ├── store/  types/  utils/  router/  services/  components/  assets/
+│       └── main.tsx
+└── server/                 ───────── independent API ─────────
+    ├── package.json  package-lock.json  node_modules/
+    ├── .env.example  .env              PORT, NODE_ENV, DATABASE_URL, …
+    ├── prisma/
+    │   ├── schema.prisma       data model (provider: sqlite → postgresql when you migrate)
+    │   └── migrations/         versioned SQL applied automatically at startup
+    ├── data/quiz.db            SQLite file (auto-created; git-ignored)
+    ├── tsconfig.json  tsconfig.base.json  vitest.config.ts
+    └── src/
+        ├── index.ts            startup: migrate → connect → listen (graceful shutdown)
+        ├── app.ts              Express app factory
+        ├── container.ts        dependency-injection wiring
+        ├── config/env.ts       zod-validated environment (+ .env loading)
+        ├── db/prisma.ts        PrismaClient factory, transaction + JSON helpers
+        ├── db/migrate.ts       programmatic `prisma migrate deploy`
+        ├── shared/             domain contracts (source of truth)
+        ├── modules/            auth · quiz · share · examinee · proctor · leaderboard · reporting · dashboard
+        ├── middleware/  services/  utils/
+        └── test/               isolated per-file SQLite clones for vitest
+```
+
+## Running each app independently
 
 ```bash
+# --- server (API on :4000) ---
+cd server
+cp .env.example .env          # edit PORT / DATABASE_URL if needed
+npm install                   # also runs `prisma generate`
+npm run dev                   # tsx watch; creates data/quiz.db + tables on first boot
+npm start                     # production mode (same auto-migration)
+npm test  ·  npm run typecheck  ·  npm run db:studio
+
+# --- client (Vite on :5173) ---
+cd client
+cp .env.example .env          # VITE_API_URL=http://localhost:4000
 npm install
-cp server/.env.example server/.env   # optional; defaults work out of the box
-npm run dev                          # server :4000 + client :5173 (API proxied)
+npm run dev                   # or: npm run build && npm run preview
+npm test  ·  npm run typecheck
+
+# --- both at once, from the root (optional) ---
+npm install                   # root tooling only (eslint, concurrently)
+npm run install:all
+npm run dev                   # concurrently: server + client
+npm run lint  ·  npm run check:shared
 ```
 
-Open http://localhost:5173, register an instructor account, create a quiz, publish it and
-copy the share link.
+The client calls `${VITE_API_URL}/api/...` with `credentials: 'include'`; the server allows that
+origin via `CLIENT_ORIGIN` (CORS with credentials). Leave `VITE_API_URL` empty to use the Vite
+proxy / same-origin mode instead.
 
-```bash
-npm test          # server (54) + client (13) test suites
-npm run typecheck # strict TS on both packages
-npm run lint      # type-aware ESLint across the monorepo
-npm run build     # typecheck server, build client to client/dist
-npm start         # production: serves API + built client from one process
-```
+## Database layer (Prisma)
+
+* **Local development: SQLite.** `DATABASE_URL="file:../data/quiz.db"` (relative `file:` paths
+  resolve from `server/prisma/`). Nothing to install or create by hand.
+* **Automatic schema creation.** On every startup (`AUTO_MIGRATE=true`, the default) the server
+  runs `prisma migrate deploy` programmatically ([server/src/db/migrate.ts](server/src/db/migrate.ts)):
+  a missing SQLite file is created, missing tables/indexes are created, and previously applied
+  migrations are skipped (tracked in `_prisma_migrations`).
+* **Modular access.** All persistence sits behind repository interfaces
+  (`AuthRepository`, `QuizRepository`, `InviteRepository`, `AttemptRepository`) implemented with
+  the Prisma client; services and routers never see SQL or the driver. JSON-shaped columns
+  (examinee fields, questions, answers) are `String` in the schema and (de)serialised at the
+  repository boundary — portable across SQLite and Postgres.
+* **Switching to PostgreSQL / Supabase** (no business-logic changes):
+  1. `prisma/schema.prisma`: `provider = "postgresql"`
+  2. `.env`: `DATABASE_URL` = Supabase pooler URL (`?pgbouncer=true`), optionally `DIRECT_URL`
+     for migrations (add `directUrl = env("DIRECT_URL")` to the datasource)
+  3. `npx prisma migrate dev --name init-postgres` once, then startup auto-migration continues
+     to apply future migrations.
+* Schema changes: edit `schema.prisma` → `npm run db:migrate -- --name <change>` → commit the
+  generated migration folder.
 
 ## Architecture
 
-Modular monolith with clean frontend / backend separation and feature-based modules:
-
-```
-client/src/
-├── assets/            design tokens + shared stylesheet
-├── components/        UI primitives (Google-Forms-style cards, TextField, Modal, Spinner, Navbar)
-├── modules/
-│   ├── auth/          instructor login/register, session store, RequireAuth / RedirectIfAuthenticated
-│   ├── builder/       Google-Forms-style builder: examinee info schema editor + MCQ answer-key editor
-│   ├── dashboard/     instructor overview, quiz CRUD, deletion, link generator, responses, analytics
-│   ├── examinee/      Step 1 info renderer + dynamic validation → Step 2 timed exam engine → result
-│   ├── leaderboard/   instructor-only leaderboard table & ranking hook
-│   ├── proctor/       fullscreen lock, tab-switch/blur observers, violation handlers
-│   ├── reporting/     credentialed .xlsx downloader + ExportButton
-│   └── share/         tokenized link builder, clipboard, invite matrix
-├── store/             global state: editor draft (quiz schema), active exam session, timer
-├── types/             TypeScript contracts (re-exported shared domain + editor draft types)
-├── utils/             countdown observable, formatters, key generator
-├── router/            lazy route table + tokenized share loader guard
-└── services/          fetch wrapper (typed HttpError), storage adapters
-
-server/src/
-├── config/env.ts      zod-validated environment (+ .env loading)
-├── container.ts       dependency-injection container wiring repositories → services → routers
-├── app.ts             Express app factory (helmet, cors, rate limits, static SPA in production)
-├── middleware/        validateBody/bodyOf, asyncHandler, errorHandler, rateLimit
-├── modules/
-│   ├── auth/          bcrypt credentials, server-side sessions (httpOnly cookie), RBAC guard
-│   ├── quiz/          QuestionFactory, quiz state machine, repositories, attempt + submission
-│   │                  services, GradingStrategy, upload endpoint
-│   ├── examinee/      re-exports the shared schema builder (server-side validation)
-│   ├── share/         CSPRNG tokens, PublicAccess / RestrictedAccess strategies, invites, resolver
-│   ├── proctor/       violation audit trail + threshold signalling
-│   ├── leaderboard/   RankingStrategy, cached ranking engine (event-invalidated), access matrix
-│   ├── reporting/     streamed exceljs workbook (Submissions + Answers sheets)
-│   └── dashboard/     analytics aggregation
-└── services/          database (schema + transactions), event bus, logger
-```
+Feature-based modules on both sides (see the tree above).
 
 ### Design patterns
 

@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '@/app';
-import { createContainer } from '@/container';
-import { openDatabase } from '@/services/database';
+import { createTestContainer } from '@/test/db';
 
 const payload = {
   title: 'Shared',
@@ -17,7 +16,7 @@ const payload = {
 
 describe('attempt start / resume', () => {
   let app: ReturnType<typeof createApp>;
-  let container: ReturnType<typeof createContainer>;
+  let container: ReturnType<typeof createTestContainer>;
   let agent: ReturnType<typeof request.agent>;
   let token: string;
   let quizId: string;
@@ -30,7 +29,7 @@ describe('attempt start / resume', () => {
   };
 
   beforeEach(async () => {
-    container = createContainer({ db: openDatabase(':memory:') });
+    container = createTestContainer();
     app = createApp(container);
     agent = request.agent(app);
     await agent.post('/api/auth/register').send({ name: 'A', email: 'a@x.io', password: 'password123' });
@@ -65,8 +64,7 @@ describe('attempt start / resume', () => {
     const ok = await request(app).post(`/api/share/${token}/attempts/validate`).send({ examinee: { name: 'Stu', email: 'S@X.io', junk: 1 } });
     expect(ok.status).toBe(200);
     expect(ok.body.examinee).toEqual({ name: 'Stu', email: 's@x.io' });
-    const count = container.db.prepare('SELECT COUNT(*) AS n FROM attempts').get() as { n: number };
-    expect(count.n).toBe(0);
+    expect(await container.db.attempt.count()).toBe(0);
   });
 
   it('pins the email to the invite on restricted quizzes', async () => {

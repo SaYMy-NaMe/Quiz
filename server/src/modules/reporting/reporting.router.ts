@@ -12,7 +12,7 @@ export function createReportingRouter(reporting: ReportingService): Router {
     '/xlsx',
     asyncHandler(async (req, res) => {
       const { id } = req.params as Record<string, string>;
-      const prepared = reporting.prepareSubmissionsExport(req.instructor!.id, String(id));
+      const prepared = await reporting.prepareSubmissionsExport(req.instructor!.id, String(id));
       res.status(200);
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename="${prepared.filename}"`);

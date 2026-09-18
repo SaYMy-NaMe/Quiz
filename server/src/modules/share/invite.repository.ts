@@ -1,4 +1,5 @@
-import type { Db } from '@/services/database';
+import type { Db } from '@/db/prisma';
+import type { Invite as InviteRow } from '@prisma/client';
 
 export interface Invite {
   id: string;
@@ -8,51 +9,41 @@ export interface Invite {
   createdAt: string;
 }
 
-interface InviteRow {
-  id: string;
-  quiz_id: string;
-  email: string;
-  token: string;
-  created_at: string;
-}
-
 const toInvite = (r: InviteRow): Invite => ({
   id: r.id,
-  quizId: r.quiz_id,
+  quizId: r.quizId,
   email: r.email,
   token: r.token,
-  createdAt: r.created_at,
+  createdAt: r.createdAt.toISOString(),
 });
 
 export interface InviteRepository {
-  listByQuiz(quizId: string): Invite[];
-  findByToken(token: string): Invite | null;
-  findByQuizAndEmail(quizId: string, email: string): Invite | null;
-  insert(invite: Invite): void;
-  delete(quizId: string, inviteId: string): boolean;
+  listByQuiz(quizId: string): Promise<Invite[]>;
+  findByToken(token: string): Promise<Invite | null>;
+  findByQuizAndEmail(quizId: string, email: string): Promise<Invite | null>;
+  insert(invite: Invite): Promise<void>;
+  delete(quizId: string, inviteId: string): Promise<boolean>;
 }
 
 export function createInviteRepository(db: Db): InviteRepository {
   return {
-    listByQuiz(quizId) {
-      return (db.prepare('SELECT * FROM invites WHERE quiz_id = ? ORDER BY created_at ASC').all(quizId) as unknown as InviteRow[]).map(toInvite);
+    async listByQuiz(quizId) {
+      return (await db.invite.findMany({ where: { quizId }, orderBy: { createdAt: 'asc' } })).map(toInvite);
     },
-    findByToken(token) {
-      const row = db.prepare('SELECT * FROM invites WHERE token = ?').get(token) as InviteRow | undefined;
+    async findByToken(token) {
+      const row = await db.invite.findUnique({ where: { token } });
       return row ? toInvite(row) : null;
     },
-    findByQuizAndEmail(quizId, email) {
-      const row = db.prepare('SELECT * FROM invites WHERE quiz_id = ? AND email = ?').get(quizId, email) as InviteRow | undefined;
+    async findByQuizAndEmail(quizId, email) {
+      const row = await db.invite.findUnique({ where: { quizId_email: { quizId, email } } });
       return row ? toInvite(row) : null;
     },
-    insert(i) {
-      db.prepare('INSERT INTO invites (id, quiz_id, email, token, created_at) VALUES (?, ?, ?, ?, ?)').run(
-        i.id, i.quizId, i.email, i.token, i.createdAt,
-      );
+    async insert(i) {
+      await db.invite.create({ data: { id: i.id, quizId: i.quizId, email: i.email, token: i.token, createdAt: new Date(i.createdAt) } });
     },
-    delete(quizId, inviteId) {
-      const result = db.prepare('DELETE FROM invites WHERE quiz_id = ? AND id = ?').run(quizId, inviteId);
-      return Number(result.changes) > 0;
+    async delete(quizId, inviteId) {
+      const result = await db.invite.deleteMany({ where: { id: inviteId, quizId } });
+      return result.count > 0;
     },
   };
 }

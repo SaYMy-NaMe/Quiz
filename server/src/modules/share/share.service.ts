@@ -19,11 +19,11 @@ export interface ShareService {
    * unauthorised restricted access and quizzes not accepting attempts so the
    * response never leaks whether a token exists.
    */
-  resolve(token: string, inviteToken?: string): ResolvedShare;
+  resolve(token: string, inviteToken?: string): Promise<ResolvedShare>;
   toPublicQuiz(resolved: ResolvedShare): PublicQuiz;
-  listInvites(ownerId: string, quizId: string): Invite[];
-  addInvites(ownerId: string, quizId: string, emails: string[]): Invite[];
-  removeInvite(ownerId: string, quizId: string, inviteId: string): void;
+  listInvites(ownerId: string, quizId: string): Promise<Invite[]>;
+  addInvites(ownerId: string, quizId: string, emails: string[]): Promise<Invite[]>;
+  removeInvite(ownerId: string, quizId: string, inviteId: string): Promise<void>;
 }
 
 interface Deps {
@@ -35,11 +35,11 @@ interface Deps {
 
 export function createShareService({ quizzes, invites, strategies, tokens }: Deps): ShareService {
   return {
-    resolve(token, inviteToken) {
+    async resolve(token, inviteToken) {
       if (!tokens.isWellFormed(token)) throw notFound();
-      const quiz = quizzes.findByToken(token);
+      const quiz = await quizzes.findByToken(token);
       if (!quiz || !stateOf(quiz).acceptsAttempts) throw notFound();
-      const decision = strategies[quiz.accessMode].authorize({ quiz, inviteToken });
+      const decision = await strategies[quiz.accessMode].authorize({ quiz, inviteToken });
       if (!decision.allowed) throw notFound();
       return { quiz, lockedEmail: decision.lockedEmail };
     },
@@ -58,32 +58,32 @@ export function createShareService({ quizzes, invites, strategies, tokens }: Dep
       return pub;
     },
 
-    listInvites(ownerId, quizId) {
-      quizzes.get(ownerId, quizId);
+    async listInvites(ownerId, quizId) {
+      await quizzes.get(ownerId, quizId);
       return invites.listByQuiz(quizId);
     },
 
-    addInvites(ownerId, quizId, emails) {
-      quizzes.get(ownerId, quizId);
+    async addInvites(ownerId, quizId, emails) {
+      await quizzes.get(ownerId, quizId);
       const created: Invite[] = [];
       for (const raw of emails) {
         const email = raw.trim().toLowerCase();
         if (!email) continue;
-        const existing = invites.findByQuizAndEmail(quizId, email);
+        const existing = await invites.findByQuizAndEmail(quizId, email);
         if (existing) {
           created.push(existing);
           continue;
         }
         const invite: Invite = { id: newId(), quizId, email, token: tokens.issueInviteToken(), createdAt: nowIso() };
-        invites.insert(invite);
+        await invites.insert(invite);
         created.push(invite);
       }
       return created;
     },
 
-    removeInvite(ownerId, quizId, inviteId) {
-      quizzes.get(ownerId, quizId);
-      if (!invites.delete(quizId, inviteId)) throw notFound('Invite not found');
+    async removeInvite(ownerId, quizId, inviteId) {
+      await quizzes.get(ownerId, quizId);
+      if (!(await invites.delete(quizId, inviteId))) throw notFound('Invite not found');
     },
   };
 }

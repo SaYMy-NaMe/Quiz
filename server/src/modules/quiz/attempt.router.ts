@@ -5,6 +5,7 @@ import type { SubmissionService } from './submission.service';
 import type { ShareService } from '@/modules/share';
 import { resolveShare } from '@/modules/share';
 import { validateBody, bodyOf } from '@/middleware/validate';
+import { asyncHandler } from '@/middleware/async-handler';
 
 const SubmitSchema = z.object({
   inviteToken: z.string().max(64).optional(),
@@ -24,27 +25,46 @@ export function createAttemptRouter(share: ShareService, attempts: AttemptServic
     res.set('Cache-Control', 'no-store');
     next();
   });
+  const attemptId = (req: import('express').Request) => String(req.params.attemptId);
 
   router.post('/validate', validateBody(StartSchema), resolveShare(share), (req, res) => {
     res.json({ examinee: attempts.validateExaminee(req.share!, bodyOf(req, StartSchema).examinee) });
   });
 
-  router.post('/', validateBody(StartSchema), resolveShare(share), (req, res) => {
-    res.status(201).json(attempts.start(req.share!, bodyOf(req, StartSchema).examinee));
-  });
+  router.post(
+    '/',
+    validateBody(StartSchema),
+    resolveShare(share),
+    asyncHandler(async (req, res) => {
+      res.status(201).json(await attempts.start(req.share!, bodyOf(req, StartSchema).examinee));
+    }),
+  );
 
-  router.get('/:attemptId', resolveShare(share), (req, res) => {
-    res.json(attempts.resume(req.share!, String(req.params.attemptId)));
-  });
+  router.get(
+    '/:attemptId',
+    resolveShare(share),
+    asyncHandler(async (req, res) => {
+      res.json(await attempts.resume(req.share!, attemptId(req)));
+    }),
+  );
 
-  router.post('/:attemptId/submit', validateBody(SubmitSchema), resolveShare(share), (req, res) => {
-    const { answers, reason } = bodyOf(req, SubmitSchema);
-    res.json({ receipt: submissions.submit(req.share!, String(req.params.attemptId), { answers, reason }) });
-  });
+  router.post(
+    '/:attemptId/submit',
+    validateBody(SubmitSchema),
+    resolveShare(share),
+    asyncHandler(async (req, res) => {
+      const { answers, reason } = bodyOf(req, SubmitSchema);
+      res.json({ receipt: await submissions.submit(req.share!, attemptId(req), { answers, reason }) });
+    }),
+  );
 
-  router.get('/:attemptId/result', resolveShare(share), (req, res) => {
-    res.json({ receipt: submissions.receipt(req.share!, String(req.params.attemptId)) });
-  });
+  router.get(
+    '/:attemptId/result',
+    resolveShare(share),
+    asyncHandler(async (req, res) => {
+      res.json({ receipt: await submissions.receipt(req.share!, attemptId(req)) });
+    }),
+  );
 
   return router;
 }

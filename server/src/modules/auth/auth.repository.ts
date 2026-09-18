@@ -1,75 +1,59 @@
-import type { Db } from '@/services/database';
+import type { Db } from '@/db/prisma';
 import type { Instructor } from '@shared';
-
-interface InstructorRow {
-  id: string;
-  email: string;
-  name: string;
-  password_hash: string;
-  created_at: string;
-}
-
-interface SessionRow {
-  id: string;
-  instructor_id: string;
-  expires_at: string;
-}
 
 export interface InstructorWithHash extends Instructor {
   passwordHash: string;
 }
 
-const toInstructor = (row: InstructorRow): InstructorWithHash => ({
+export interface SessionRecord {
+  id: string;
+  instructorId: string;
+  expiresAt: string;
+}
+
+const toInstructor = (row: { id: string; email: string; name: string; passwordHash: string; createdAt: Date }): InstructorWithHash => ({
   id: row.id,
   email: row.email,
   name: row.name,
-  createdAt: row.created_at,
-  passwordHash: row.password_hash,
+  createdAt: row.createdAt.toISOString(),
+  passwordHash: row.passwordHash,
 });
 
 export interface AuthRepository {
-  findByEmail(email: string): InstructorWithHash | null;
-  findById(id: string): InstructorWithHash | null;
-  create(input: { id: string; email: string; name: string; passwordHash: string; createdAt: string }): void;
-  createSession(input: { id: string; instructorId: string; expiresAt: string; createdAt: string }): void;
-  findSession(id: string): SessionRow | null;
-  deleteSession(id: string): void;
-  purgeExpiredSessions(nowIso: string): void;
+  findByEmail(email: string): Promise<InstructorWithHash | null>;
+  findById(id: string): Promise<InstructorWithHash | null>;
+  create(input: { id: string; email: string; name: string; passwordHash: string; createdAt: string }): Promise<void>;
+  createSession(input: { id: string; instructorId: string; expiresAt: string; createdAt: string }): Promise<void>;
+  findSession(id: string): Promise<SessionRecord | null>;
+  deleteSession(id: string): Promise<void>;
+  purgeExpiredSessions(nowIso: string): Promise<void>;
 }
 
 export function createAuthRepository(db: Db): AuthRepository {
   return {
-    findByEmail(email) {
-      const row = db.prepare('SELECT * FROM instructors WHERE email = ?').get(email) as InstructorRow | undefined;
+    async findByEmail(email) {
+      const row = await db.instructor.findUnique({ where: { email } });
       return row ? toInstructor(row) : null;
     },
-    findById(id) {
-      const row = db.prepare('SELECT * FROM instructors WHERE id = ?').get(id) as InstructorRow | undefined;
+    async findById(id) {
+      const row = await db.instructor.findUnique({ where: { id } });
       return row ? toInstructor(row) : null;
     },
-    create({ id, email, name, passwordHash, createdAt }) {
-      db.prepare(
-        'INSERT INTO instructors (id, email, name, password_hash, created_at) VALUES (?, ?, ?, ?, ?)',
-      ).run(id, email, name, passwordHash, createdAt);
+    async create({ id, email, name, passwordHash, createdAt }) {
+      await db.instructor.create({ data: { id, email, name, passwordHash, createdAt: new Date(createdAt) } });
     },
-    createSession({ id, instructorId, expiresAt, createdAt }) {
-      db.prepare('INSERT INTO sessions (id, instructor_id, expires_at, created_at) VALUES (?, ?, ?, ?)').run(
-        id,
-        instructorId,
-        expiresAt,
-        createdAt,
-      );
+    async createSession({ id, instructorId, expiresAt, createdAt }) {
+      await db.session.create({ data: { id, instructorId, expiresAt: new Date(expiresAt), createdAt: new Date(createdAt) } });
     },
-    findSession(id) {
-      return (db.prepare('SELECT id, instructor_id, expires_at FROM sessions WHERE id = ?').get(id) as
-        | SessionRow
-        | undefined) ?? null;
+    async findSession(id) {
+      const row = await db.session.findUnique({ where: { id } });
+      return row ? { id: row.id, instructorId: row.instructorId, expiresAt: row.expiresAt.toISOString() } : null;
     },
-    deleteSession(id) {
-      db.prepare('DELETE FROM sessions WHERE id = ?').run(id);
+    async deleteSession(id) {
+      await db.session.deleteMany({ where: { id } });
     },
-    purgeExpiredSessions(now) {
-      db.prepare('DELETE FROM sessions WHERE expires_at < ?').run(now);
+    async purgeExpiredSessions(now) {
+      await db.session.deleteMany({ where: { expiresAt: { lt: new Date(now) } } });
     },
   };
 }
