@@ -22,7 +22,7 @@ Audited at `main@191ec89` against the "Google Forms Clone for Proctored Exams" s
 | Folder layout | ⚠️ | Editor lives under `modules/quiz`; spec mandates `modules/builder`, top-level `store/`, `types/`, `utils/` |
 | Stray `* 2.*` duplicate files (untracked) | ❌ | Stale snapshots; removed |
 
-## Realignment plan
+## Realignment plan (all stages completed — see git history `setup/repo-audit` → `refactor/polish`)
 
 1. **Layout** (this stage): move the editor into `modules/builder`, global stores into `src/store`,
    contracts into `src/types`, the countdown observable into `src/utils`. `modules/quiz` is dissolved.

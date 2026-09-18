@@ -86,6 +86,18 @@ describe('platform integration', () => {
     expect(res.body.quiz.questions).toBeUndefined();
   });
 
+  it('Step 1 validates metadata without starting a clock; Step 2 opens the timed attempt', async () => {
+    const invite = invites[0]!;
+    const bad = await anon.post(`/api/share/${ctx.token}/attempts/validate`).send({ inviteToken: invite.token, examinee: { name: '', section: 'Z' } });
+    expect(bad.status).toBe(400);
+    expect(Object.keys(bad.body.error.details.fieldErrors).sort()).toEqual(['name', 'section']);
+    const ok = await anon.post(`/api/share/${ctx.token}/attempts/validate`).send({ inviteToken: invite.token, examinee: { name: 'Pre', section: 'A' } });
+    expect(ok.status).toBe(200);
+    expect(ok.body.examinee.email).toBe(invite.email);
+    const attempts = container.db.prepare('SELECT COUNT(*) AS n FROM attempts').get() as { n: number };
+    expect(attempts.n).toBe(0);
+  });
+
   const runExaminee = async (
     invite: { email: string; token: string },
     name: string,

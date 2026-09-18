@@ -1,8 +1,9 @@
-# Quiz Platform
+# Quiz Platform — Google-Forms-style proctored exams
 
-Production-grade online quiz platform: strict timed proctoring, dynamic leaderboards,
-automated grading, dynamic examinee metadata collection, Excel reporting and
-link-exclusive quiz distribution.
+Production-grade online quiz platform: a Google-Forms-style builder (dynamic examinee info schema
++ MCQ answer keys), a strict two-step proctored exam flow for examinees who never log in,
+background grading, an instructor-only real-time leaderboard, Excel reporting and
+link-exclusive distribution.
 
 ## Stack
 
@@ -27,7 +28,7 @@ Open http://localhost:5173, register an instructor account, create a quiz, publi
 copy the share link.
 
 ```bash
-npm test          # server (48) + client (9) test suites
+npm test          # server (54) + client (13) test suites
 npm run typecheck # strict TS on both packages
 npm run lint      # type-aware ESLint across the monorepo
 npm run build     # typecheck server, build client to client/dist
@@ -88,28 +89,46 @@ server/src/
 
 ## Key flows
 
-**Link-exclusive access.** Publishing issues a 22-char CSPRNG token (132 bits). The only entry
-point is `/quiz/v/:token`; unknown tokens, unpublished quizzes and restricted quizzes without
-a valid `?invite=` all return the same 404. Quizzes are never listed publicly.
+**Roles.** Only instructors authenticate (bcrypt + server-side sessions in an httpOnly cookie).
+Examinees need no account: the only entry point is a tokenized link.
 
-**Examinee wizard.** Step 1 renders the instructor-defined fields and validates them with the
-dynamically synthesised Zod schema (client for UX, server as the authority). Step 2 opens a
-timed attempt; the server owns `expiresAt`. The client countdown derives remaining time from
-the deadline + server clock offset, so refreshes never reset the timer. Answers, attempt id and
-violation count persist in `localStorage` per token.
+**Builder (instructor).** Two Google-Forms-style editors: the *examinee info schema* (Student ID,
+Name, Email, Course Code, Section … as text / number / email / dropdown, required or optional) and
+the *MCQ questionnaire* (2–6 choices, text or image prompts for questions **and** choices, an
+explicit answer-key radio per question, points). Toggles control whether examinees see their
+**score** and/or the **answer key** after submitting.
 
-**Proctoring.** Fullscreen is requested inside the Step-1 click. `visibilitychange`, window
-`blur` and `fullscreenchange` are hard violations (de-duplicated within 1.5 s); common
-navigation/devtools shortcuts and the context menu are blocked. The second hard violation
-auto-submits with `reason=violation`. The server records every violation.
+**Link-exclusive access.** Publishing issues a 22-char CSPRNG token (132 bits). Unknown tokens,
+unpublished quizzes and restricted quizzes without a valid `?invite=` all return the same 404.
+Quizzes are never listed publicly; a leaked link can be rotated from the dashboard.
 
-**Grading & leaderboard.** Submissions are idempotent; late submissions are stamped
-`timeout`. Rankings use Score ↓ → Duration ↑ → SubmittedAt ↑. Instructors can hide the board
-from examinees at any time; the public board never exposes other examinees' metadata.
+**Two-step exam.**
+*Step 1* renders the instructor-defined fields and validates them (client for UX, then
+`POST …/attempts/validate` on the server — no attempt, no timer, no proctoring). The clean record
+is held locally as a *pending examinee*.
+*Step 2* shows the rules and a **Start Quiz** button. That click requests fullscreen, opens the
+attempt on the server (which sets the deadline), starts the countdown and arms proctoring. The
+countdown derives remaining time from the server deadline + clock offset, so a refresh resumes
+with the same clock; answers, attempt id and violation count persist in `localStorage` per token.
+An omnipresent floating timer stays visible while scrolling.
 
-**Reporting.** `GET /api/quizzes/:id/export/xlsx` streams a workbook: one column per examinee
-field, plus Score, Max, %, Time Taken (s / hh:mm:ss), Started/Submitted ISO-8601, Violations,
-Reason; a second sheet lists every (submission, question) answer.
+**Proctoring (Step 2 only).** `visibilitychange`, window `blur` and `fullscreenchange` are hard
+violations (de-duplicated within 1.5 s); common navigation/devtools shortcuts, the context menu and
+copy/cut are blocked; `beforeunload` prompts. OS-level Alt+Tab / Cmd+Tab cannot be cancelled by any
+page and are detected post-hoc via blur/visibility. The **second** hard violation auto-submits
+(`reason=violation`). Browser controls unlock (fullscreen released, listeners removed) immediately
+upon submission.
+
+**Grading.** Answer keys never leave the server before submission (every examinee payload is
+stripped; a test pins this). Submissions are idempotent; late submissions are stamped `timeout`.
+Instructors can **regrade** all stored submissions after correcting a key.
+
+**Leaderboard (instructor-only).** Score ↓ → Duration ↑ → SubmittedAt ↑, cached per quiz and
+invalidated by submission / regrade events. There is no examinee-facing ranking route at all.
+
+**Reporting.** `GET /api/quizzes/:id/export/xlsx` streams a workbook: *Submissions* (one column per
+examinee field + Score, Max, %, Time Taken, Started/Submitted ISO-8601, Violations, Reason),
+*Answers* (every submission × question) and *Summary* (metadata + per-question correct rates).
 
 ## API summary
 
@@ -117,12 +136,10 @@ Reason; a second sheet lists every (submission, question) answer.
 |--------|------|------|
 | POST | `/api/auth/register` · `/login` · `/logout` — GET `/me` | cookie session |
 | GET/POST | `/api/quizzes` · GET/PUT/DELETE `/api/quizzes/:id` | instructor |
-| POST | `/api/quizzes/:id/publish` · `/unpublish` · `/close` · `/reopen` | instructor |
-| PATCH | `/api/quizzes/:id/leaderboard-visibility` | instructor |
+| POST | `/api/quizzes/:id/publish` · `/unpublish` · `/close` · `/reopen` · `/rotate-token` · `/regrade` | instructor |
 | GET/POST/DELETE | `/api/quizzes/:id/invites[/:inviteId]` | instructor |
 | GET | `/api/quizzes/:id/leaderboard` · `/analytics` · `/submissions` · `/export/xlsx` | instructor |
 | POST | `/api/uploads/image` | instructor |
 | GET | `/api/share/:token[?invite=]` | token |
-| POST | `/api/share/:token/attempts` — GET `/:attemptId` | token |
+| POST | `/api/share/:token/attempts/validate` (Step 1) · `/attempts` (Start Quiz) — GET `/:attemptId` | token |
 | POST | `/api/share/:token/attempts/:attemptId/submit` · `/violations` — GET `/result` | token |
-| GET | `/api/share/:token/leaderboard` | token (+ visibility flag) |
