@@ -1,15 +1,15 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/node_modules/**', 'eslint.config.js', '**/vite.config.ts', '**/vitest.config.ts', 'server/prisma/**', 'scripts/**'] },
+  { ignores: ['dist/**', 'node_modules/**', 'eslint.config.js', 'vitest.config.ts', 'prisma/**'] },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
   {
     languageOptions: {
+      globals: globals.node,
       parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
     },
     rules: {
@@ -26,17 +26,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['server/**/*.ts'],
-    languageOptions: { globals: globals.node },
-  },
-  {
-    files: ['client/**/*.{ts,tsx}'],
-    languageOptions: { globals: globals.browser },
-    plugins: { 'react-hooks': reactHooks },
-    rules: reactHooks.configs.recommended.rules,
-  },
-  {
-    files: ['**/*.test.ts', '**/*.test.tsx'],
+    files: ['**/*.test.ts'],
     rules: {
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
