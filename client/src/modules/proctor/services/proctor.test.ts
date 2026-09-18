@@ -32,6 +32,18 @@ describe('proctor observer', () => {
     expect(events).toHaveLength(3);
   });
 
+  it('arms a beforeunload guard only while armed', () => {
+    const p = createProctor();
+    p.arm();
+    const leave = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(leave);
+    expect(leave.defaultPrevented).toBe(true);
+    p.disarm();
+    const leaveAgain = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(leaveAgain);
+    expect(leaveAgain.defaultPrevented).toBe(false);
+  });
+
   it('blocks shortcuts and context menu as soft events', () => {
     const p = createProctor();
     const events: ViolationEvent[] = [];

@@ -34,7 +34,7 @@ export function ProctorOverlays({ warning, onDismiss, fullscreen, onEnterFullscr
             <strong>{KIND_LABEL[warning.kind]}.</strong>
           </p>
           {exceeded ? (
-            <p>You reached the violation limit. Your answers {submitting ? 'are being' : 'have been'} submitted automatically.</p>
+            <p>You reached the violation limit. Your answers {submitting ? 'are being' : 'have been'} submitted automatically and browser controls are unlocked.</p>
           ) : (
             <p>
               Leaving the test again will submit your answers automatically. Stay in this fullscreen window until you finish.
