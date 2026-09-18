@@ -1,0 +1,35 @@
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import pinoHttp from 'pino-http';
+import { env } from '@/config/env';
+import { logger } from '@/services/logger';
+import { errorHandler } from '@/middleware/error-handler';
+import type { Container } from '@/container';
+
+export function createApp(container: Container): express.Express {
+  const app = express();
+  app.disable('x-powered-by');
+  app.set('trust proxy', 1);
+
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+  app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));
+  app.use(cookieParser());
+  app.use(express.json({ limit: '1mb' }));
+  if (env.NODE_ENV !== 'test') {
+    app.use(pinoHttp({ logger, autoLogging: { ignore: (req) => req.url === '/api/health' } }));
+  }
+
+  app.get('/api/health', (_req, res) => {
+    res.json({ ok: true, uptime: process.uptime() });
+  });
+
+  void container;
+
+  app.use('/api', (_req, res) => {
+    res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Not found' } });
+  });
+  app.use(errorHandler);
+  return app;
+}
