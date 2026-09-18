@@ -28,6 +28,14 @@ export const router = createBrowserRouter([
             path: 'dashboard',
             lazy: () => import('@/modules/dashboard/pages/DashboardPlaceholder'),
           },
+          {
+            path: 'dashboard/quizzes/new',
+            lazy: () => import('@/modules/quiz/pages').then((m) => ({ Component: m.QuizEditorPage })),
+          },
+          {
+            path: 'dashboard/quizzes/:id/edit',
+            lazy: () => import('@/modules/quiz/pages').then((m) => ({ Component: m.QuizEditorPage })),
+          },
         ],
       },
       { path: '*', element: <NotFoundPage /> },
