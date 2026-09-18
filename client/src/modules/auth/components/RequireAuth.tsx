@@ -14,7 +14,7 @@ export function RequireAuth() {
   }, [bootstrap]);
 
   if (status === 'idle' || status === 'loading') return <Spinner label="Checking session…" fullscreen />;
-  if (status === 'anonymous') return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  if (status === 'anonymous') return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}` }} />;
   return <Outlet />;
 }
 
