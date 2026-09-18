@@ -2,7 +2,15 @@ import type { Db } from '@/services/database';
 import { openDatabase } from '@/services/database';
 import { env } from '@/config/env';
 import { createAuthRepository, createAuthService, type AuthService } from '@/modules/auth';
-import { createQuizRepository, createQuizService, type QuizService } from '@/modules/quiz';
+import {
+  createQuizRepository,
+  createQuizService,
+  createAttemptRepository,
+  createAttemptService,
+  type QuizService,
+  type AttemptService,
+  type AttemptRepository,
+} from '@/modules/quiz';
 import {
   createTokenService,
   createInviteRepository,
@@ -20,6 +28,8 @@ export interface Container {
   auth: AuthService;
   quizzes: QuizService;
   share: ShareService;
+  attemptRepo: AttemptRepository;
+  attempts: AttemptService;
 }
 
 export function createContainer(overrides: { db?: Db } = {}): Container {
@@ -35,5 +45,8 @@ export function createContainer(overrides: { db?: Db } = {}): Container {
   const invites = createInviteRepository(db);
   const share = createShareService({ quizzes, invites, strategies: createAccessStrategies(invites), tokens });
 
-  return { db, auth, quizzes, share };
+  const attemptRepo = createAttemptRepository(db);
+  const attempts = createAttemptService(attemptRepo);
+
+  return { db, auth, quizzes, share, attemptRepo, attempts };
 }

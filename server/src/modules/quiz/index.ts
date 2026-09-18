@@ -7,3 +7,8 @@ export { createUploadRouter } from './upload.router';
 export { QuestionFactory, OptionFactory } from './question.factory';
 export { stateOf } from './quiz.state';
 export { QuizUpsertSchema } from './quiz.schemas';
+export { createAttemptRepository } from './attempt.repository';
+export type { AttemptRepository } from './attempt.repository';
+export { createAttemptService, toPublicQuestions } from './attempt.service';
+export type { AttemptService, StartedAttempt } from './attempt.service';
+export { createAttemptRouter } from './attempt.router';
