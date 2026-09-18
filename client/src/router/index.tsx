@@ -47,6 +47,7 @@ export const router = createBrowserRouter([
           { index: true, lazy: () => import('@/modules/examinee/pages/QuizEntryPage') },
           { path: 'test', lazy: () => import('@/modules/examinee/pages/QuizTestPage') },
           { path: 'result', lazy: () => import('@/modules/examinee/pages/QuizResultPage') },
+          { path: 'leaderboard', lazy: () => import('@/modules/leaderboard/pages/PublicLeaderboardPage') },
         ],
       },
       { path: '*', element: <NotFoundPage /> },
