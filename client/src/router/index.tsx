@@ -43,7 +43,10 @@ export const router = createBrowserRouter([
         path: 'quiz/v/:token',
         loader: shareLoader,
         errorElement: <NotFoundPage />,
-        lazy: () => import('@/modules/examinee/pages/QuizEntryPage'),
+        children: [
+          { index: true, lazy: () => import('@/modules/examinee/pages/QuizEntryPage') },
+          { path: 'test', lazy: () => import('@/modules/examinee/pages/QuizTestPage') },
+        ],
       },
       { path: '*', element: <NotFoundPage /> },
     ],
