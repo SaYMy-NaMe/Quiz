@@ -8,6 +8,7 @@ import type { Submission } from '@shared';
 export interface DomainEvents {
   'submission:created': (submission: Submission) => void;
   'attempt:violation': (payload: { attemptId: string; quizId: string; violations: number; kind: string }) => void;
+  'submissions:regraded': (payload: { quizId: string; changed: number }) => void;
 }
 
 export interface EventBus {

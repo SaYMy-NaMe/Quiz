@@ -58,6 +58,7 @@ export interface AttemptRepository {
   markSubmitted(id: string): void;
   incrementViolations(id: string, kind: string, occurredAt: string, eventId: string): number;
   insertSubmission(submission: Submission): void;
+  updateScore(submissionId: string, score: number, maxScore: number): void;
   findSubmission(id: string): Submission | null;
   findSubmissionByAttempt(attemptId: string): Submission | null;
   listSubmissions(quizId: string): Submission[];
@@ -92,6 +93,9 @@ export function createAttemptRepository(db: Db): AttemptRepository {
         s.id, s.quizId, s.attemptId, JSON.stringify(s.examinee), JSON.stringify(s.answers), s.score, s.maxScore,
         s.durationSeconds, s.startedAt, s.submittedAt, s.violations, s.reason,
       );
+    },
+    updateScore(id, score, maxScore) {
+      db.prepare('UPDATE submissions SET score = ?, max_score = ? WHERE id = ?').run(score, maxScore, id);
     },
     findSubmission(id) {
       const row = db.prepare('SELECT * FROM submissions WHERE id = ?').get(id) as SubmissionRow | undefined;

@@ -28,6 +28,7 @@ export function createLeaderboardService({ quizzes, attempts, strategy, events }
   // examinee polling stays cheap while results stay real-time.
   const cache = new Map<string, Leaderboard>();
   events.on('submission:created', (s) => cache.delete(s.quizId));
+  events.on('submissions:regraded', ({ quizId }) => cache.delete(quizId));
 
   const rank = (quiz: Quiz, submissions: Submission[]): Leaderboard => {
     const sorted = [...submissions].sort((a, b) => strategy.compare(a, b));
