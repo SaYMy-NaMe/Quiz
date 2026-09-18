@@ -43,8 +43,9 @@ export interface GradedQuestionResult {
 /** What the examinee sees after submitting. */
 export interface SubmissionReceipt {
   submissionId: string;
-  score: number;
-  maxScore: number;
+  /** Null when the instructor hides scores from examinees. */
+  score: number | null;
+  maxScore: number | null;
   durationSeconds: number;
   submittedAt: string;
   reason: SubmissionReason;

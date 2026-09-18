@@ -63,7 +63,8 @@ export function Component() {
   }
   if (!receipt) return <Spinner label="Loading your result…" fullscreen />;
 
-  const pct = receipt.maxScore > 0 ? Math.round((receipt.score / receipt.maxScore) * 100) : 0;
+  const scoreShown = receipt.score !== null && receipt.maxScore !== null;
+  const pct = scoreShown && receipt.maxScore! > 0 ? Math.round((receipt.score! / receipt.maxScore!) * 100) : 0;
   const byQuestion = new Map((receipt.breakdown ?? []).map((b) => [b.questionId, b]));
 
   return (
@@ -72,7 +73,11 @@ export function Component() {
       <div className="card" style={{ marginBottom: '1rem' }}>
         <h1>{quiz.title}</h1>
         <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
-          <div className="stat"><div className="stat__value">{receipt.score}/{receipt.maxScore}</div><div className="stat__label">Score ({pct}%)</div></div>
+          {scoreShown ? (
+            <div className="stat"><div className="stat__value">{receipt.score}/{receipt.maxScore}</div><div className="stat__label">Score ({pct}%)</div></div>
+          ) : (
+            <div className="stat"><div className="stat__value">✓</div><div className="stat__label">Submitted</div></div>
+          )}
           <div className="stat"><div className="stat__value">{formatClock(receipt.durationSeconds)}</div><div className="stat__label">Time taken</div></div>
           <div className="stat"><div className="stat__value small" style={{ fontSize: '1rem' }}>{formatTimestamp(receipt.submittedAt)}</div><div className="stat__label">Submitted</div></div>
         </div>
@@ -90,7 +95,7 @@ export function Component() {
           ))}
         </div>
       ) : (
-        <p className="muted">The instructor has chosen not to reveal the answer key.</p>
+        <p className="muted">{scoreShown ? 'The instructor has chosen not to reveal the answer key.' : 'Your response has been recorded. The instructor will share results separately.'}</p>
       )}
     </main>
   );

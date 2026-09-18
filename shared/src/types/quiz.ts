@@ -6,6 +6,9 @@ export type AccessMode = 'public' | 'restricted';
 
 export interface QuizSettings {
   durationSeconds: number;
+  /** Show the examinee their score on the result page. */
+  revealScores: boolean;
+  /** Show the examinee the answer key (implies the score is visible). */
   revealAnswers: boolean;
   leaderboardVisible: boolean;
   accessMode: AccessMode;

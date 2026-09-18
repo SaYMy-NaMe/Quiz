@@ -6,9 +6,12 @@ import { HttpError } from '@/services/http';
 interface ImageUploaderProps {
   value: string | null;
   onChange: (url: string | null) => void;
+  label?: string;
+  /** Compact mode for choice thumbnails. */
+  compact?: boolean;
 }
 
-export function ImageUploader({ value, onChange }: ImageUploaderProps) {
+export function ImageUploader({ value, onChange, label = 'Image', compact = false }: ImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,24 +36,21 @@ export function ImageUploader({ value, onChange }: ImageUploaderProps) {
   };
 
   return (
-    <div className="field">
-      <span className="field__label">Image prompt</span>
-      {value && <img src={value} alt="Question prompt" className="question__image" loading="lazy" decoding="async" />}
-      <div className="row">
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/webp,image/gif"
-          onChange={(e) => void onFile(e.target.files?.[0])}
-          disabled={busy}
-          aria-label="Upload question image"
-        />
+    <div className={compact ? 'row' : 'field'} style={compact ? { gap: '0.5rem' } : undefined}>
+      {!compact && <span className="field__label">{label}</span>}
+      {value && (
+        <img src={value} alt={label} className={compact ? '' : 'question__image'} style={compact ? { width: 56, height: 56, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--border)' } : undefined} loading="lazy" decoding="async" />
+      )}
+      <div className="row" style={{ gap: '0.5rem' }}>
+        <label className="btn btn--sm" style={{ cursor: busy ? 'progress' : 'pointer' }}>
+          {busy ? 'Uploading…' : value ? '🖼 Replace' : '🖼 Add image'}
+          <input ref={inputRef} type="file" className="sr-only" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(e) => void onFile(e.target.files?.[0])} disabled={busy} aria-label={`Upload ${label.toLowerCase()}`} />
+        </label>
         {value && (
-          <button type="button" className="btn btn--sm" onClick={() => onChange(null)}>
+          <button type="button" className="btn btn--sm btn--ghost" onClick={() => onChange(null)}>
             Remove
           </button>
         )}
-        {busy && <span className="muted small">Uploading…</span>}
       </div>
       {error && (
         <span className="field__error" role="alert">

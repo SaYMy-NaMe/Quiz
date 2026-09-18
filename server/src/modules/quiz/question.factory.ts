@@ -6,6 +6,7 @@ import { badRequest } from '@/utils/errors';
 export interface OptionInput {
   id?: string | undefined;
   text: string;
+  imageUrl?: string | null | undefined;
 }
 
 export interface QuestionInput {
@@ -27,8 +28,10 @@ export interface QuestionInput {
 export const OptionFactory = {
   create: (input: OptionInput): QuestionOption => {
     const text = input.text.trim();
-    if (!text) throw badRequest('Option text cannot be empty');
-    return { id: input.id ?? newId(), text };
+    if (!text && !input.imageUrl) throw badRequest('Options need text or an image');
+    const option: QuestionOption = { id: input.id ?? newId(), text };
+    if (input.imageUrl) option.imageUrl = input.imageUrl;
+    return option;
   },
 };
 

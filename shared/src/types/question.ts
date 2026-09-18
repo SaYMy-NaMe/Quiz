@@ -3,6 +3,8 @@ export type PromptType = 'text' | 'image';
 export interface QuestionOption {
   id: string;
   text: string;
+  /** Optional image prompt for the choice itself. */
+  imageUrl?: string;
 }
 
 export interface Question {

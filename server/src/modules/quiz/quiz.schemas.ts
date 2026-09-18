@@ -1,10 +1,13 @@
 import { z } from 'zod';
 import { MIN_OPTIONS, MAX_OPTIONS, MIN_DURATION_SECONDS, MAX_DURATION_SECONDS } from '@shared';
 
-export const OptionInputSchema = z.object({
-  id: z.string().min(1).max(32).optional(),
-  text: z.string().trim().min(1, 'Option text is required').max(500),
-});
+export const OptionInputSchema = z
+  .object({
+    id: z.string().min(1).max(32).optional(),
+    text: z.string().trim().max(500).default(''),
+    imageUrl: z.string().max(500).nullable().optional(),
+  })
+  .refine((o) => o.text.length > 0 || Boolean(o.imageUrl), { message: 'Option needs text or an image', path: ['text'] });
 
 export const QuestionInputSchema = z
   .object({
@@ -43,6 +46,7 @@ export const SchemaFieldInputSchema = z
 
 export const QuizSettingsSchema = z.object({
   durationSeconds: z.number().int().min(MIN_DURATION_SECONDS).max(MAX_DURATION_SECONDS),
+  revealScores: z.boolean(),
   revealAnswers: z.boolean(),
   leaderboardVisible: z.boolean(),
   accessMode: z.enum(['public', 'restricted']),

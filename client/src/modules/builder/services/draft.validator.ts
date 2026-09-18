@@ -20,9 +20,9 @@ export function validateDraft(draft: QuizDraft): DraftErrors {
     if (q.promptType === 'text' && !q.prompt.trim()) e.prompt = 'Prompt is required';
     if (q.promptType === 'image' && !q.imageUrl) e.imageUrl = 'Upload an image for this question';
     q.options.forEach((o, i) => {
-      if (!o.text.trim()) e[`options.${i}`] = 'Empty option';
+      if (!o.text.trim() && !o.imageUrl) e[`options.${i}`] = 'Empty option';
     });
-    if (Object.keys(e).some((k) => k.startsWith('options.'))) e.options = 'All options need text';
+    if (Object.keys(e).some((k) => k.startsWith('options.'))) e.options = 'Every option needs text or an image';
     if (!q.options.some((o) => o.key === q.correctKey)) e.options = 'Select the correct answer';
     if (Object.keys(e).length) errors.questions[q.key] = e;
   }

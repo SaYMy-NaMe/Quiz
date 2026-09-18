@@ -34,6 +34,7 @@ interface Deps {
 
 const DEFAULT_SETTINGS = {
   durationSeconds: 600,
+  revealScores: true,
   revealAnswers: false,
   leaderboardVisible: true,
   accessMode: 'public' as const,
@@ -43,11 +44,13 @@ const DEFAULT_SETTINGS = {
 function applySettings(base: QuizSettings, partial: { [K in keyof QuizSettings]?: QuizSettings[K] | undefined }): QuizSettings {
   const next: QuizSettings = {
     durationSeconds: base.durationSeconds,
+    revealScores: base.revealScores,
     revealAnswers: base.revealAnswers,
     leaderboardVisible: base.leaderboardVisible,
     accessMode: base.accessMode,
   };
   if (partial.durationSeconds !== undefined) next.durationSeconds = partial.durationSeconds;
+  if (partial.revealScores !== undefined) next.revealScores = partial.revealScores;
   if (partial.revealAnswers !== undefined) next.revealAnswers = partial.revealAnswers;
   if (partial.leaderboardVisible !== undefined) next.leaderboardVisible = partial.leaderboardVisible;
   if (partial.accessMode !== undefined) next.accessMode = partial.accessMode;
