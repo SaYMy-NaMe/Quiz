@@ -33,7 +33,7 @@ export function createApp(container: Container): express.Express {
   app.use('/api/auth', createAuthRouter(container.auth));
   app.use('/api/quizzes/:id/invites', createInviteRouter(container.share));
   app.use('/api/quizzes', createQuizRouter(container.quizzes));
-  app.use('/api/share/:token/attempts', createAttemptRouter(container.share, container.attempts));
+  app.use('/api/share/:token/attempts', createAttemptRouter(container.share, container.attempts, container.submissions));
   app.use('/api/share', createShareRouter(container.share));
   app.use('/api/uploads', createUploadRouter(env.UPLOAD_DIR));
   app.use(

@@ -12,3 +12,7 @@ export type { AttemptRepository } from './attempt.repository';
 export { createAttemptService, toPublicQuestions } from './attempt.service';
 export type { AttemptService, StartedAttempt } from './attempt.service';
 export { createAttemptRouter } from './attempt.router';
+export { StandardGradingStrategy, NegativeMarkingStrategy } from './grading.strategy';
+export type { GradingStrategy, GradeResult } from './grading.strategy';
+export { createSubmissionService } from './submission.service';
+export type { SubmissionService } from './submission.service';
