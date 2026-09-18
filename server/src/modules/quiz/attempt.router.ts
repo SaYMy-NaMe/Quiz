@@ -25,6 +25,10 @@ export function createAttemptRouter(share: ShareService, attempts: AttemptServic
     next();
   });
 
+  router.post('/validate', validateBody(StartSchema), resolveShare(share), (req, res) => {
+    res.json({ examinee: attempts.validateExaminee(req.share!, bodyOf(req, StartSchema).examinee) });
+  });
+
   router.post('/', validateBody(StartSchema), resolveShare(share), (req, res) => {
     res.status(201).json(attempts.start(req.share!, bodyOf(req, StartSchema).examinee));
   });
