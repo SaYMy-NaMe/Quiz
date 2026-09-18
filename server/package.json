@@ -1,6 +1,6 @@
 {
-  "name": "@quiz/server",
-  "version": "0.1.0",
+  "name": "quiz-server",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -36,5 +36,9 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "vitest": "^2.1.8"
+  },
+  "description": "Quiz Platform API (Express + Prisma). Standalone; serves the client build too when present.",
+  "engines": {
+    "node": ">=22.5"
   }
 }

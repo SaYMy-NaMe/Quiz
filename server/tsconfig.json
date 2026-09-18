@@ -1,14 +1,14 @@
 {
-  "extends": "../tsconfig.base.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "types": ["node"],
     "lib": ["ES2022"],
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["../shared/src/*"],
-      "@shared": ["../shared/src/index.ts"],
+      "@shared/*": ["src/shared/*"],
+      "@shared": ["src/shared/index.ts"],
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*.ts", "../shared/src/**/*.ts"]
+  "include": ["src/**/*.ts"]
 }

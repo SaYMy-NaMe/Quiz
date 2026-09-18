@@ -1,4 +1,5 @@
 import type { PublicQuestion, GradedQuestionResult } from '@/types';
+import { assetUrl } from '@/config';
 
 interface Props {
   question: PublicQuestion;
@@ -20,7 +21,7 @@ export function McqRenderer({ question, index, selected, onSelect, result }: Pro
         </span>
       </div>
       {question.promptType === 'image' && question.imageUrl && (
-        <img src={question.imageUrl} alt={question.prompt || `Question ${index + 1} image`} className="question__image" loading="lazy" decoding="async" />
+        <img src={assetUrl(question.imageUrl)} alt={question.prompt || `Question ${index + 1} image`} className="question__image" loading="lazy" decoding="async" />
       )}
       {question.prompt && (
         <p className="question__prompt" id={`q-${question.id}-p`}>
@@ -38,7 +39,7 @@ export function McqRenderer({ question, index, selected, onSelect, result }: Pro
           return (
             <label key={o.id} className={cls}>
               <input type="radio" name={`q-${question.id}`} value={o.id} checked={isSelected} disabled={review} onChange={() => onSelect?.(o.id)} />
-              {o.imageUrl && <img src={o.imageUrl} alt={o.text || 'Choice image'} className="option__image" loading="lazy" decoding="async" />}
+              {o.imageUrl && <img src={assetUrl(o.imageUrl)} alt={o.text || 'Choice image'} className="option__image" loading="lazy" decoding="async" />}
               {o.text && <span>{o.text}</span>}
             </label>
           );

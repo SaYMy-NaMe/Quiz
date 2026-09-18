@@ -4,7 +4,7 @@ import path from 'node:path';
 export default defineConfig({
   resolve: {
     alias: {
-      '@shared': path.resolve(__dirname, '../shared/src/index.ts'),
+      '@shared': path.resolve(__dirname, 'src/shared/index.ts'),
       '@': path.resolve(__dirname, 'src'),
     },
   },

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { MAX_IMAGE_BYTES } from '@shared';
 import { quizApi } from '../services/quiz.api';
 import { HttpError } from '@/services/http';
+import { assetUrl } from '@/config';
 
 interface ImageUploaderProps {
   value: string | null;
@@ -39,7 +40,7 @@ export function ImageUploader({ value, onChange, label = 'Image', compact = fals
     <div className={compact ? 'row' : 'field'} style={compact ? { gap: '0.5rem' } : undefined}>
       {!compact && <span className="field__label">{label}</span>}
       {value && (
-        <img src={value} alt={label} className={compact ? '' : 'question__image'} style={compact ? { width: 56, height: 56, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--border)' } : undefined} loading="lazy" decoding="async" />
+        <img src={assetUrl(value)} alt={label} className={compact ? '' : 'question__image'} style={compact ? { width: 56, height: 56, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--border)' } : undefined} loading="lazy" decoding="async" />
       )}
       <div className="row" style={{ gap: '0.5rem' }}>
         <label className="btn btn--sm" style={{ cursor: busy ? 'progress' : 'pointer' }}>

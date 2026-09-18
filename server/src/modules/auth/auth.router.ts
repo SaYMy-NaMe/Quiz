@@ -25,7 +25,7 @@ export function createAuthRouter(auth: AuthService): Router {
   const setCookie = (res: import('express').Response, sessionId: string, expiresAt: string) => {
     res.cookie(SESSION_COOKIE, sessionId, {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: env.COOKIE_SAMESITE,
       secure: env.HTTPS,
       expires: new Date(expiresAt),
       path: '/',

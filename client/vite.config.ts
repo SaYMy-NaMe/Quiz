@@ -11,15 +11,16 @@ export default defineConfig({
   appType: 'spa',
   resolve: {
     alias: {
-      '@shared': path.resolve(__dirname, '../shared/src/index.ts'),
+      '@shared': path.resolve(__dirname, 'src/shared/index.ts'),
       '@': path.resolve(__dirname, 'src'),
     },
   },
   server: {
     port: 5173,
+    // Dev proxy used only when VITE_API_URL is empty (same-origin mode).
     proxy: {
-      '/api': { target: 'http://localhost:4000', changeOrigin: true },
-      '/uploads': { target: 'http://localhost:4000', changeOrigin: true },
+      '/api': { target: process.env.VITE_PROXY_TARGET ?? 'http://localhost:4000', changeOrigin: true },
+      '/uploads': { target: process.env.VITE_PROXY_TARGET ?? 'http://localhost:4000', changeOrigin: true },
     },
   },
   build: {

@@ -12,6 +12,8 @@ const EnvSchema = z.object({
   /** Directory of the built client to serve in production (empty disables static serving). */
   CLIENT_DIST: z.string().default('../client/dist'),
   /** Set to true only when the app is served over HTTPS (enables secure cookies + upgrade-insecure-requests). */
+  /** Cookie SameSite policy. Use 'none' (requires HTTPS=true) when the client is on another site. */
+  COOKIE_SAMESITE: z.enum(['lax', 'strict', 'none']).default('lax'),
   HTTPS: z
     .string()
     .default('false')
