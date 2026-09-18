@@ -2,8 +2,9 @@ import { Router } from 'express';
 import { z } from 'zod';
 import type { AuthService } from './auth.service';
 import { SESSION_COOKIE, requireInstructor } from './auth.middleware';
-import { validateBody } from '@/middleware/validate';
+import { validateBody, bodyOf } from '@/middleware/validate';
 import { env } from '@/config/env';
+import { rateLimit } from '@/middleware/rate-limit';
 
 const RegisterSchema = z.object({
   name: z.string().trim().min(1).max(80),
@@ -18,6 +19,8 @@ const LoginSchema = z.object({
 
 export function createAuthRouter(auth: AuthService): Router {
   const router = Router();
+  // Credential endpoints are brute-force targets: 20 attempts / 15 min per IP.
+  const credentialLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: env.NODE_ENV === 'test' ? 1000 : 20 });
 
   const setCookie = (res: import('express').Response, sessionId: string, expiresAt: string) => {
     res.cookie(SESSION_COOKIE, sessionId, {
@@ -29,14 +32,14 @@ export function createAuthRouter(auth: AuthService): Router {
     });
   };
 
-  router.post('/register', validateBody(RegisterSchema), (req, res) => {
-    const { instructor, sessionId, expiresAt } = auth.register(req.body);
+  router.post('/register', credentialLimiter, validateBody(RegisterSchema), (req, res) => {
+    const { instructor, sessionId, expiresAt } = auth.register(bodyOf(req, RegisterSchema));
     setCookie(res, sessionId, expiresAt);
     res.status(201).json({ instructor });
   });
 
-  router.post('/login', validateBody(LoginSchema), (req, res) => {
-    const { instructor, sessionId, expiresAt } = auth.login(req.body);
+  router.post('/login', credentialLimiter, validateBody(LoginSchema), (req, res) => {
+    const { instructor, sessionId, expiresAt } = auth.login(bodyOf(req, LoginSchema));
     setCookie(res, sessionId, expiresAt);
     res.json({ instructor });
   });

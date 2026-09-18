@@ -70,7 +70,7 @@ export function createQuizService({ repo, tokens }: Deps): QuizService {
   const owned = (ownerId: string, quizId: string): Quiz => {
     const quiz = repo.findById(quizId);
     // Non-owners get the same 404 as a missing quiz so ids can't be probed.
-    if (!quiz || quiz.ownerId !== ownerId) throw notFound('Quiz not found');
+    if (quiz?.ownerId !== ownerId) throw notFound('Quiz not found');
     return quiz;
   };
 

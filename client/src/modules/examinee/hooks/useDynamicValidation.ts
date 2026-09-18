@@ -25,11 +25,9 @@ export function useDynamicValidation(fields: SchemaField[]) {
     (fieldId: string, values: FormValues) => {
       const result = validateExaminee(fields, values);
       setErrors((prev) => {
-        const next = { ...prev };
         const msg = result.errors[fieldId];
-        if (msg) next[fieldId] = msg;
-        else delete next[fieldId];
-        return next;
+        const next = Object.fromEntries(Object.entries(prev).filter(([k]) => k !== fieldId));
+        return msg ? { ...next, [fieldId]: msg } : next;
       });
     },
     [fields],

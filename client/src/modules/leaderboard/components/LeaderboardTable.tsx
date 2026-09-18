@@ -5,7 +5,7 @@ import { formatDuration, formatTimestamp, formatPercent } from '@/utils/format';
 interface Props {
   board: Leaderboard;
   /** Extra examinee columns to show (instructor view). */
-  extraColumns?: Array<{ fieldId: string; label: string }>;
+  extraColumns?: { fieldId: string; label: string }[];
   highlightSubmissionId?: string | null;
 }
 

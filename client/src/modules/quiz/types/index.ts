@@ -67,21 +67,21 @@ export interface QuizUpsertPayload {
   title: string;
   description: string;
   settings: QuizDraft['settings'];
-  examineeFields: Array<{
+  examineeFields: {
     fieldId: string;
     label: string;
     type: DraftSchemaField['type'];
     required: boolean;
     options?: string[];
     placeholder?: string;
-  }>;
-  questions: Array<{
+  }[];
+  questions: {
     id?: string;
     prompt: string;
     promptType: 'text' | 'image';
     imageUrl?: string | null;
-    options: Array<{ id?: string; text: string }>;
+    options: { id?: string; text: string }[];
     correctIndex: number;
     points: number;
-  }>;
+  }[];
 }

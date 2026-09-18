@@ -14,7 +14,7 @@ export function secureToken(length: number): string {
   while (out.length < length) {
     const bytes = randomBytes(length);
     for (let i = 0; i < bytes.length && out.length < length; i++) {
-      out += ALPHABET[bytes[i]! & 63];
+      out += ALPHABET[bytes[i]! & 63] ?? '';
     }
   }
   return out;

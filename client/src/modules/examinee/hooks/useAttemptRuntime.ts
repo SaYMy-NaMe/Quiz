@@ -5,6 +5,7 @@ import { useTimerStore } from '@/modules/quiz/store/timer.store';
 import { attemptApi } from '../services/attempt.api';
 import { submissionApi } from '../services/submission.api';
 import type { SubmissionReason } from '@/modules/quiz/types';
+import { HttpError } from '@/services/http';
 
 export const examineePaths = {
   entry: (token: string, invite: string | null) => `/quiz/v/${token}${invite ? `?invite=${encodeURIComponent(invite)}` : ''}`,
@@ -20,7 +21,6 @@ type Phase = 'loading' | 'ready' | 'submitting' | 'done' | 'missing';
  */
 export function useAttemptRuntime(token: string, invite: string | null, quizId: string) {
   const navigate = useNavigate();
-  const store = useAttemptStore();
   const startTimer = useTimerStore((s) => s.start);
   const stopTimer = useTimerStore((s) => s.stop);
   const [phase, setPhase] = useState<Phase>('loading');
@@ -51,8 +51,9 @@ export function useAttemptRuntime(token: string, invite: string | null, quizId: 
 
   useEffect(() => {
     let cancelled = false;
+    const store = useAttemptStore.getState();
     const persisted = store.hydrate(token);
-    if (!persisted || persisted.quizId !== quizId) {
+    if (persisted?.quizId !== quizId) {
       setPhase('missing');
       return;
     }
@@ -81,8 +82,12 @@ export function useAttemptRuntime(token: string, invite: string | null, quizId: 
         });
         setPhase('ready');
       })
-      .catch(() => {
-        if (!cancelled) setPhase('missing');
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        // The server no longer knows this attempt (quiz deleted/reset): drop the stale local copy
+        // so the entry page doesn't bounce back here forever.
+        if (err instanceof HttpError && err.status === 404) store.clear(token);
+        setPhase('missing');
       });
     return () => {
       cancelled = true;

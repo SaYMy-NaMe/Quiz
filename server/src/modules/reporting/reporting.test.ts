@@ -52,7 +52,7 @@ describe('Excel export', () => {
     expect(res.headers['content-disposition']).toMatch(/export-me-submissions-.*\.xlsx/);
 
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(res.body as unknown as ArrayBuffer);
+    await wb.xlsx.load(res.body);
     const sheet = wb.getWorksheet('Submissions')!;
     const headers = (sheet.getRow(1).values as string[]).slice(1);
     expect(headers.slice(0, 5)).toEqual(['Rank', 'Full Name', 'Section', 'Score', 'Max Score']);

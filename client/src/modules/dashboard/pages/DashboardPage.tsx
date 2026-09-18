@@ -67,7 +67,7 @@ export function Component() {
 
         {error && <div className="alert alert--error" role="alert">{error} <button className="btn btn--sm" onClick={load}>Retry</button></div>}
         {quizzes === null && !error && <Spinner label="Loading quizzes…" />}
-        {quizzes && quizzes.length === 0 && (
+        {quizzes?.length === 0 && (
           <div className="card" style={{ textAlign: 'center' }}>
             <h2>No quizzes yet</h2>
             <p className="muted">Create your first quiz, add questions and examinee fields, then publish it to get a private link.</p>

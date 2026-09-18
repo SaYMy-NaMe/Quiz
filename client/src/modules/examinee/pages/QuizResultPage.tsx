@@ -20,14 +20,17 @@ const REASON_LABEL: Record<SubmissionReceipt['reason'], string> = {
 
 export function Component() {
   const { quiz, token, invite } = useLoaderData() as ShareLoaderData;
-  const store = useAttemptStore();
-  const [receipt, setReceipt] = useState<SubmissionReceipt | null>(store.receipt);
-  const [questions, setQuestions] = useState<PublicQuestion[]>(store.questions);
+  const storedReceipt = useAttemptStore((s) => s.receipt);
+  const storedQuestions = useAttemptStore((s) => s.questions);
+  const answers = useAttemptStore((s) => s.answers);
+  const [receipt, setReceipt] = useState<SubmissionReceipt | null>(storedReceipt);
+  const [questions, setQuestions] = useState<PublicQuestion[]>(storedQuestions);
   const [missing, setMissing] = useState(false);
 
   useEffect(() => {
+    const store = useAttemptStore.getState();
     const persisted = store.hydrate(token);
-    if (!persisted || persisted.quizId !== quiz.id) {
+    if (persisted?.quizId !== quiz.id) {
       setMissing(true);
       return;
     }
@@ -46,7 +49,6 @@ export function Component() {
       }
     };
     void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, invite, quiz.id]);
 
   if (missing) {
@@ -84,7 +86,7 @@ export function Component() {
         <div className="stack">
           <h2>Answer key</h2>
           {questions.map((q, i) => (
-            <McqRenderer key={q.id} question={q} index={i} selected={store.answers[q.id]} result={byQuestion.get(q.id)} />
+            <McqRenderer key={q.id} question={q} index={i} selected={answers[q.id]} result={byQuestion.get(q.id)} />
           ))}
         </div>
       ) : (

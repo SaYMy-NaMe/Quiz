@@ -20,10 +20,10 @@ describe('ExamineeSchemaBuilder', () => {
   it('reports required, format and enum errors per field', () => {
     const r = validateExaminee(fields, { email: 'nope', section: 'Z', age: 'abc' });
     expect(r.success).toBe(false);
-    expect(r.errors['student_id']).toMatch(/required/);
-    expect(r.errors['email']).toMatch(/valid email/);
-    expect(r.errors['section']).toMatch(/Choose one/);
-    expect(r.errors['age']).toMatch(/number/);
+    expect(r.errors.student_id).toMatch(/required/);
+    expect(r.errors.email).toMatch(/valid email/);
+    expect(r.errors.section).toMatch(/Choose one/);
+    expect(r.errors.age).toMatch(/number/);
   });
 
   it('strips unknown keys', () => {

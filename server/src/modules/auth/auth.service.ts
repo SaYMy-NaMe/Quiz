@@ -11,6 +11,7 @@ export interface AuthService {
   login(credentials: Credentials): { instructor: Instructor; sessionId: string; expiresAt: string };
   logout(sessionId: string): void;
   resolveSession(sessionId: string): Instructor | null;
+  purgeExpiredSessions(): void;
 }
 
 interface AuthServiceDeps {
@@ -64,6 +65,10 @@ export function createAuthService({ repo, sessionTtlHours, bcryptRounds = 10 }: 
 
     logout(sessionId) {
       repo.deleteSession(sessionId);
+    },
+
+    purgeExpiredSessions() {
+      repo.purgeExpiredSessions(nowIso());
     },
 
     resolveSession(sessionId) {

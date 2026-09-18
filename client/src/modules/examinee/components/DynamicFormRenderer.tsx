@@ -39,7 +39,7 @@ export function DynamicFormRenderer({ fields, values, errors, lockedFieldIds = [
             </label>
             {f.type === 'select' ? (
               <select className="select" value={values[f.fieldId] ?? ''} onChange={(e) => onChange(f.fieldId, e.target.value)} {...common}>
-                <option value="">{f.placeholder || 'Select…'}</option>
+                <option value="">{f.placeholder ?? 'Select…'}</option>
                 {(f.options ?? []).map((o) => (
                   <option key={o} value={o}>
                     {o}

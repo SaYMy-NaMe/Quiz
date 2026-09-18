@@ -23,7 +23,7 @@ export function createProctorService(repo: AttemptRepository, events: EventBus):
   return {
     record({ quiz }, attemptId, kind) {
       const attempt = repo.findAttempt(attemptId);
-      if (!attempt || attempt.quizId !== quiz.id) throw notFound('Attempt not found');
+      if (attempt?.quizId !== quiz.id) throw notFound('Attempt not found');
       if (attempt.status === 'submitted') {
         return { violations: attempt.violations, threshold: VIOLATION_THRESHOLD, shouldSubmit: false };
       }

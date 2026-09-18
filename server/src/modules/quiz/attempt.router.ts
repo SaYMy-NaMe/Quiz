@@ -4,7 +4,7 @@ import type { AttemptService } from './attempt.service';
 import type { SubmissionService } from './submission.service';
 import type { ShareService } from '@/modules/share';
 import { resolveShare } from '@/modules/share';
-import { validateBody } from '@/middleware/validate';
+import { validateBody, bodyOf } from '@/middleware/validate';
 
 const SubmitSchema = z.object({
   inviteToken: z.string().max(64).optional(),
@@ -26,20 +26,20 @@ export function createAttemptRouter(share: ShareService, attempts: AttemptServic
   });
 
   router.post('/', validateBody(StartSchema), resolveShare(share), (req, res) => {
-    res.status(201).json(attempts.start(req.share!, req.body.examinee));
+    res.status(201).json(attempts.start(req.share!, bodyOf(req, StartSchema).examinee));
   });
 
   router.get('/:attemptId', resolveShare(share), (req, res) => {
-    res.json(attempts.resume(req.share!, String(req.params['attemptId'])));
+    res.json(attempts.resume(req.share!, String(req.params.attemptId)));
   });
 
   router.post('/:attemptId/submit', validateBody(SubmitSchema), resolveShare(share), (req, res) => {
-    const { answers, reason } = req.body as { answers: Record<string, string>; reason: 'manual' | 'timeout' | 'violation' };
-    res.json({ receipt: submissions.submit(req.share!, String(req.params['attemptId']), { answers, reason }) });
+    const { answers, reason } = bodyOf(req, SubmitSchema);
+    res.json({ receipt: submissions.submit(req.share!, String(req.params.attemptId), { answers, reason }) });
   });
 
   router.get('/:attemptId/result', resolveShare(share), (req, res) => {
-    res.json({ receipt: submissions.receipt(req.share!, String(req.params['attemptId'])) });
+    res.json({ receipt: submissions.receipt(req.share!, String(req.params.attemptId)) });
   });
 
   return router;

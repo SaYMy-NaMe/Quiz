@@ -18,10 +18,10 @@ export function QuizSettingsForm({ errors = {} }: { errors?: Record<string, stri
           max={Math.floor(MAX_DURATION_SECONDS / 60)}
           value={minutes}
           onChange={(e) => setSettings({ durationSeconds: Math.max(1, Number(e.target.value) || 1) * 60 })}
-          aria-invalid={errors['durationSeconds'] ? 'true' : undefined}
+          aria-invalid={errors.durationSeconds ? 'true' : undefined}
         />
         <span className="field__hint">The countdown starts the moment an examinee enters the test and auto-submits at 00:00.</span>
-        {errors['durationSeconds'] && <span className="field__error">{errors['durationSeconds']}</span>}
+        {errors.durationSeconds && <span className="field__error">{errors.durationSeconds}</span>}
       </div>
 
       <label className="switch">

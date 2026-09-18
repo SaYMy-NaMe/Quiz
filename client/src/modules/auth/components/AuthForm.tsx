@@ -42,7 +42,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       const next: FieldErrors = {};
       for (const issue of parsed.error.issues) {
         const key = issue.path[0] as keyof FieldErrors;
-        if (!next[key]) next[key] = issue.message;
+        next[key] ??= issue.message;
       }
       setErrors(next);
       return;

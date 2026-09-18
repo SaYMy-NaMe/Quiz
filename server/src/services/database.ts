@@ -9,7 +9,7 @@ export type Db = DatabaseSyncType;
  * `node:sqlite` is resolved through `process.getBuiltinModule` so that bundlers
  * (Vite/vitest) which predate the module never try to resolve the specifier.
  */
-const { DatabaseSync } = process.getBuiltinModule('node:sqlite') as typeof import('node:sqlite');
+const { DatabaseSync } = process.getBuiltinModule('node:sqlite');
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS instructors (
