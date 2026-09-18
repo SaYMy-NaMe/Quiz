@@ -3,7 +3,7 @@ import type { ShareLoaderData } from '@/router/share-loader';
 import { leaderboardApi } from '../services/leaderboard.api';
 import { useLeaderboard } from '../hooks/useLeaderboard';
 import { LeaderboardTable } from '../components/LeaderboardTable';
-import { useAttemptStore } from '@/modules/quiz/store/attempt.store';
+import { useAttemptStore } from '@/store/attempt.store';
 import { Spinner } from '@/components/Spinner';
 import { formatTimestamp } from '@/utils/format';
 

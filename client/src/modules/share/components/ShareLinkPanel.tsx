@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import type { Quiz } from '@/modules/quiz/types';
+import type { Quiz } from '@/types';
 import { shareApi, type Invite } from '../services/share.api';
 import { buildShareUrl } from '../services/link-builder';
 import { CopyLinkButton } from './CopyLinkButton';

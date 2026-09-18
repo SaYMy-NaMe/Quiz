@@ -1,5 +1,5 @@
 import { http } from '@/services/http';
-import type { AnswerMap, SubmissionReason, SubmissionReceipt } from '@/modules/quiz/types';
+import type { AnswerMap, SubmissionReason, SubmissionReceipt } from '@/types';
 
 const base = (token: string, attemptId: string) => `/share/${encodeURIComponent(token)}/attempts/${attemptId}`;
 

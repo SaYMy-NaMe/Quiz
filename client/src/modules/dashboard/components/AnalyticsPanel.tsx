@@ -1,5 +1,5 @@
 import type { QuizAnalytics } from '@shared';
-import type { Quiz } from '@/modules/quiz/types';
+import type { Quiz } from '@/types';
 import { StatTile } from './StatTile';
 import { formatDuration, formatPercent } from '@/utils/format';
 

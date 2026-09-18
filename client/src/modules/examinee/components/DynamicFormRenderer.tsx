@@ -1,4 +1,4 @@
-import type { SchemaField } from '@/modules/quiz/types';
+import type { SchemaField } from '@/types';
 import type { FormValues } from '../hooks/useDynamicValidation';
 
 interface Props {

@@ -41,24 +41,21 @@ Modular monolith with clean frontend / backend separation and feature-based modu
 ```
 client/src/
 ├── assets/            design tokens + shared stylesheet
-├── components/        UI primitives (TextField, Modal, Spinner, Navbar, …)
-├── config/            app constants
+├── components/        UI primitives (Google-Forms-style cards, TextField, Modal, Spinner, Navbar)
 ├── modules/
-│   ├── auth/          login/register, session store, RequireAuth / RedirectIfAuthenticated guards
-│   ├── dashboard/     instructor overview, quiz cards, analytics, lifecycle actions, deletion
-│   ├── examinee/      schema builder UI, DynamicFormRenderer, dynamic validation, wizard pages
-│   ├── leaderboard/   polling hook, rank badges, table, visibility toggle, public page
-│   ├── proctor/       fullscreen / visibility / blur / shortcut observer, warning overlays
+│   ├── auth/          instructor login/register, session store, RequireAuth / RedirectIfAuthenticated
+│   ├── builder/       Google-Forms-style builder: examinee info schema editor + MCQ answer-key editor
+│   ├── dashboard/     instructor overview, quiz CRUD, deletion, link generator, responses, analytics
+│   ├── examinee/      Step 1 info renderer + dynamic validation → Step 2 timed exam engine → result
+│   ├── leaderboard/   instructor-only leaderboard table & ranking hook
+│   ├── proctor/       fullscreen lock, tab-switch/blur observers, violation handlers
 │   ├── reporting/     credentialed .xlsx downloader + ExportButton
-│   ├── share/         link builder, clipboard, invite matrix
-│   └── quiz/
-│       ├── components/  QuestionEditor, ImageUploader, McqRenderer, Timer, QuizEditor
-│       ├── services/    quiz API, draft mapper (factory), draft validator, countdown observable
-│       ├── store/       editor store · attempt store (localStorage) · timer store (isolated)
-│       └── types/       re-exported contracts + editor draft types
+│   └── share/         tokenized link builder, clipboard, invite matrix
+├── store/             global state: editor draft (quiz schema), active exam session, timer
+├── types/             TypeScript contracts (re-exported shared domain + editor draft types)
+├── utils/             countdown observable, formatters, key generator
 ├── router/            lazy route table + tokenized share loader guard
-├── services/          fetch wrapper (typed HttpError), storage adapters
-└── utils/             formatters, key generator
+└── services/          fetch wrapper (typed HttpError), storage adapters
 
 server/src/
 ├── config/env.ts      zod-validated environment (+ .env loading)

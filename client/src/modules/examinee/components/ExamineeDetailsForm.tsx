@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import type { PublicQuiz, ExamineeRecord } from '@/modules/quiz/types';
+import type { PublicQuiz, ExamineeRecord } from '@/types';
 import { DynamicFormRenderer } from './DynamicFormRenderer';
 import { useDynamicValidation, type FormValues } from '../hooks/useDynamicValidation';
 

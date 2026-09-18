@@ -4,9 +4,9 @@ import type { ShareLoaderData } from '@/router/share-loader';
 import { WizardSteps } from '../components/WizardSteps';
 import { ExamineeDetailsForm } from '../components/ExamineeDetailsForm';
 import { attemptApi } from '../services/attempt.api';
-import { useAttemptStore } from '@/modules/quiz/store/attempt.store';
+import { useAttemptStore } from '@/store/attempt.store';
 import { HttpError } from '@/services/http';
-import type { ExamineeRecord } from '@/modules/quiz/types';
+import type { ExamineeRecord } from '@/types';
 import { createProctor } from '@/modules/proctor';
 
 const testPath = (token: string, invite: string | null) => `/quiz/v/${token}/test${invite ? `?invite=${encodeURIComponent(invite)}` : ''}`;

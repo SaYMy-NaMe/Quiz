@@ -1,4 +1,4 @@
-import type { PublicQuestion, GradedQuestionResult } from '../types';
+import type { PublicQuestion, GradedQuestionResult } from '@/types';
 
 interface Props {
   question: PublicQuestion;

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { VIOLATION_THRESHOLD } from '@shared';
 import { createProctor, type ViolationEvent, type ViolationKind } from '../services/proctor';
 import { proctorApi } from '../services/proctor.api';
-import { useAttemptStore } from '@/modules/quiz/store/attempt.store';
+import { useAttemptStore } from '@/store/attempt.store';
 
 export interface ProctorWarning {
   kind: ViolationKind;

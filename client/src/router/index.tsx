@@ -29,11 +29,11 @@ export const router = createBrowserRouter([
           { path: 'dashboard/quizzes/:id', lazy: () => import('@/modules/dashboard/pages/QuizOverviewPage') },
           {
             path: 'dashboard/quizzes/new',
-            lazy: () => import('@/modules/quiz/pages').then((m) => ({ Component: m.QuizEditorPage })),
+            lazy: () => import('@/modules/builder/pages').then((m) => ({ Component: m.QuizEditorPage })),
           },
           {
             path: 'dashboard/quizzes/:id/edit',
-            lazy: () => import('@/modules/quiz/pages').then((m) => ({ Component: m.QuizEditorPage })),
+            lazy: () => import('@/modules/builder/pages').then((m) => ({ Component: m.QuizEditorPage })),
           },
         ],
       },

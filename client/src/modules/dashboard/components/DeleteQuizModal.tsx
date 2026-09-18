@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Modal } from '@/components/Modal';
-import { quizApi } from '@/modules/quiz/services/quiz.api';
+import { quizApi } from '@/modules/builder/services/quiz.api';
 import { HttpError } from '@/services/http';
 
 interface Props {

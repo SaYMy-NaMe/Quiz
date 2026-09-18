@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import { Link, useLoaderData } from 'react-router-dom';
 import type { ShareLoaderData } from '@/router/share-loader';
 import { WizardSteps } from '../components/WizardSteps';
-import { McqRenderer } from '@/modules/quiz/components/McqRenderer';
-import { useAttemptStore } from '@/modules/quiz/store/attempt.store';
+import { McqRenderer } from '@/modules/examinee/components/McqRenderer';
+import { useAttemptStore } from '@/store/attempt.store';
 import { attemptApi } from '../services/attempt.api';
 import { submissionApi } from '../services/submission.api';
-import { formatClock } from '@/modules/quiz/services/countdown';
+import { formatClock } from '@/utils/countdown';
 import { formatTimestamp } from '@/utils/format';
 import { Spinner } from '@/components/Spinner';
-import type { SubmissionReceipt, PublicQuestion } from '@/modules/quiz/types';
+import type { SubmissionReceipt, PublicQuestion } from '@/types';
 import { examineePaths } from '../hooks/useAttemptRuntime';
 
 const REASON_LABEL: Record<SubmissionReceipt['reason'], string> = {
