@@ -25,7 +25,7 @@ export const DraftFactory = {
     return {
       title: '',
       description: '',
-      settings: { durationSeconds: 600, revealScores: true, revealAnswers: false, leaderboardVisible: true, accessMode: 'public' },
+      settings: { durationSeconds: 600, revealScores: true, revealAnswers: false, accessMode: 'public' },
       examineeFields: [],
       questions: [DraftFactory.question()],
     };
@@ -40,7 +40,6 @@ export function quizToDraft(quiz: Quiz): QuizDraft {
       durationSeconds: quiz.durationSeconds,
       revealScores: quiz.revealScores,
       revealAnswers: quiz.revealAnswers,
-      leaderboardVisible: quiz.leaderboardVisible,
       accessMode: quiz.accessMode,
     },
     examineeFields: quiz.examineeFields.map((f) => ({

@@ -16,8 +16,6 @@ export const quizApi = {
   close: (id: string) => http.post<QuizResponse>(`/quizzes/${id}/close`),
   reopen: (id: string) => http.post<QuizResponse>(`/quizzes/${id}/reopen`),
   rotateToken: (id: string) => http.post<QuizResponse>(`/quizzes/${id}/rotate-token`),
-  setLeaderboardVisibility: (id: string, visible: boolean) =>
-    http.patch<QuizResponse>(`/quizzes/${id}/leaderboard-visibility`, { visible }),
   uploadImage: (file: File) => {
     const form = new FormData();
     form.append('image', file);

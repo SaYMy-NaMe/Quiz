@@ -48,7 +48,6 @@ export const QuizSettingsSchema = z.object({
   durationSeconds: z.number().int().min(MIN_DURATION_SECONDS).max(MAX_DURATION_SECONDS),
   revealScores: z.boolean(),
   revealAnswers: z.boolean(),
-  leaderboardVisible: z.boolean(),
   accessMode: z.enum(['public', 'restricted']),
 });
 

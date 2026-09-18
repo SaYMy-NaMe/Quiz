@@ -29,7 +29,7 @@ let invites: { email: string; token: string }[] = [];
 const quizPayload = {
   title: 'Integration Quiz',
   description: 'Full lifecycle',
-  settings: { durationSeconds: 300, revealAnswers: true, leaderboardVisible: true, accessMode: 'restricted' },
+  settings: { durationSeconds: 300, revealAnswers: true, accessMode: 'restricted' },
   examineeFields: [
     { fieldId: 'name', label: 'Full Name', type: 'text', required: true },
     { fieldId: 'email', label: 'Email', type: 'email', required: true },
@@ -130,18 +130,13 @@ describe('platform integration', () => {
     expect(r3.reason).toBe('violation');
   });
 
-  it('ranks Score desc → Duration asc → Timestamp asc and exposes the public board', async () => {
+  it('ranks Score desc → Duration asc → Timestamp asc for the instructor only', async () => {
     const mine = await instructor.get(`/api/quizzes/${ctx.quizId}/leaderboard`);
     const names = mine.body.leaderboard.entries.map((e: { displayName: string }) => e.displayName);
     expect(names).toEqual(['Bob', 'Ann', 'Cat']); // Bob and Ann tie on score; Bob was faster
     expect(mine.body.leaderboard.entries[0].examinee.email).toBe('bob@uni.edu');
 
-    const pub = await anon.get(`/api/share/${ctx.token}/leaderboard?invite=${invites[0]!.token}`);
-    expect(pub.status).toBe(200);
-    expect(pub.body.leaderboard.entries[0].examinee).toEqual({});
-
-    await instructor.patch(`/api/quizzes/${ctx.quizId}/leaderboard-visibility`).send({ visible: false });
-    expect((await anon.get(`/api/share/${ctx.token}/leaderboard?invite=${invites[0]!.token}`)).status).toBe(403);
+    expect((await anon.get(`/api/share/${ctx.token}/leaderboard?invite=${invites[0]!.token}`)).status).toBe(404);
   });
 
   it('reports analytics with per-question distributions', async () => {

@@ -1,17 +1,13 @@
 import type { Leaderboard, LeaderboardEntry, Quiz, Submission } from '@shared';
 import { displayNameFor } from '@/modules/examinee';
 import type { AttemptRepository, QuizService } from '@/modules/quiz';
-import type { ResolvedShare } from '@/modules/share';
 import type { EventBus } from '@/services/event-bus';
 import type { RankingStrategy } from './ranking.strategy';
-import { forbidden } from '@/utils/errors';
 import { nowIso } from '@/utils/time';
 
 export interface LeaderboardService {
-  /** Instructor view — always allowed for the owner. */
+  /** Instructor view — the only consumer. Examinees never see rankings. */
   forInstructor(ownerId: string, quizId: string): Leaderboard;
-  /** Examinee view — gated by the quiz's `leaderboardVisible` flag. */
-  forExaminee(share: ResolvedShare): Leaderboard;
   /** Pure ranking used by both views and by the reporting module. */
   rank(quiz: Quiz, submissions: Submission[]): Leaderboard;
 }
@@ -57,12 +53,6 @@ export function createLeaderboardService({ quizzes, attempts, strategy, events }
     rank,
     forInstructor(ownerId, quizId) {
       return build(quizzes.get(ownerId, quizId));
-    },
-    forExaminee({ quiz }) {
-      if (!quiz.leaderboardVisible) throw forbidden('The leaderboard is not visible for this quiz');
-      const board = build(quiz);
-      // Examinees never receive the raw metadata of other examinees.
-      return { ...board, entries: board.entries.map((e) => ({ ...e, examinee: {} })) };
     },
   };
 }

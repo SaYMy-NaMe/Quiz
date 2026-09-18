@@ -21,7 +21,6 @@ export interface QuizService {
   unpublish(ownerId: string, quizId: string): Quiz;
   close(ownerId: string, quizId: string): Quiz;
   reopen(ownerId: string, quizId: string): Quiz;
-  setLeaderboardVisibility(ownerId: string, quizId: string, visible: boolean): Quiz;
   /** Issues a fresh share token; every previously distributed link stops resolving. */
   rotateShareToken(ownerId: string, quizId: string): Quiz;
   /** Internal lookup used by share/attempt modules (no ownership check). */
@@ -38,7 +37,6 @@ const DEFAULT_SETTINGS = {
   durationSeconds: 600,
   revealScores: true,
   revealAnswers: false,
-  leaderboardVisible: true,
   accessMode: 'public' as const,
 };
 
@@ -48,13 +46,11 @@ function applySettings(base: QuizSettings, partial: { [K in keyof QuizSettings]?
     durationSeconds: base.durationSeconds,
     revealScores: base.revealScores,
     revealAnswers: base.revealAnswers,
-    leaderboardVisible: base.leaderboardVisible,
     accessMode: base.accessMode,
   };
   if (partial.durationSeconds !== undefined) next.durationSeconds = partial.durationSeconds;
   if (partial.revealScores !== undefined) next.revealScores = partial.revealScores;
   if (partial.revealAnswers !== undefined) next.revealAnswers = partial.revealAnswers;
-  if (partial.leaderboardVisible !== undefined) next.leaderboardVisible = partial.leaderboardVisible;
   if (partial.accessMode !== undefined) next.accessMode = partial.accessMode;
   return next;
 }
@@ -137,8 +133,6 @@ export function createQuizService({ repo, tokens }: Deps): QuizService {
     unpublish: (o, id) => transition(o, id, (q) => stateOf(q).unpublish(q)),
     close: (o, id) => transition(o, id, (q) => stateOf(q).close(q)),
     reopen: (o, id) => transition(o, id, (q) => stateOf(q).reopen(q)),
-
-    setLeaderboardVisibility: (o, id, visible) => transition(o, id, (q) => ({ ...q, leaderboardVisible: visible })),
 
     rotateShareToken: (o, id) =>
       transition(o, id, (q) => {

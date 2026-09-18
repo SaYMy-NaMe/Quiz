@@ -38,7 +38,6 @@ CREATE TABLE IF NOT EXISTS quizzes (
   duration_seconds INTEGER NOT NULL DEFAULT 600,
   reveal_answers INTEGER NOT NULL DEFAULT 0,
   reveal_scores INTEGER NOT NULL DEFAULT 1,
-  leaderboard_visible INTEGER NOT NULL DEFAULT 1,
   examinee_fields TEXT NOT NULL DEFAULT '[]',
   questions TEXT NOT NULL DEFAULT '[]',
   created_at TEXT NOT NULL,

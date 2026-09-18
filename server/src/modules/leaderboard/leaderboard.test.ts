@@ -54,28 +54,20 @@ describe('leaderboard API', () => {
     token = pub.body.quiz.shareToken;
   });
 
-  it('ranks in real time and hides examinee metadata from the public view', async () => {
+  it('ranks in real time for the instructor and is invisible to examinees', async () => {
     await take('Zed', false);
     await take('Amy', true);
-    const pub = await request(app).get(`/api/share/${token}/leaderboard`);
-    expect(pub.status).toBe(200);
-    expect(pub.body.leaderboard.entries.map((e: { displayName: string }) => e.displayName)).toEqual(['Amy', 'Zed']);
-    expect(pub.body.leaderboard.entries[0].rank).toBe(1);
-    expect(pub.body.leaderboard.entries[0].examinee).toEqual({});
+    const mine = await agent.get(`/api/quizzes/${quizId}/leaderboard`);
+    expect(mine.status).toBe(200);
+    expect(mine.body.leaderboard.entries.map((e: { displayName: string }) => e.displayName)).toEqual(['Amy', 'Zed']);
+    expect(mine.body.leaderboard.entries[0].rank).toBe(1);
+    expect(mine.body.leaderboard.entries[0].examinee.name).toBe('Amy');
 
     await take('Bob', true); // cache must be invalidated by the submission event
-    const again = await request(app).get(`/api/share/${token}/leaderboard`);
-    expect(again.body.leaderboard.entries).toHaveLength(3);
+    expect((await agent.get(`/api/quizzes/${quizId}/leaderboard`)).body.leaderboard.entries).toHaveLength(3);
 
-    const mine = await agent.get(`/api/quizzes/${quizId}/leaderboard`);
-    expect(mine.body.leaderboard.entries[0].examinee.name).toBe('Amy');
-  });
-
-  it('respects the instructor visibility toggle', async () => {
-    await agent.patch(`/api/quizzes/${quizId}/leaderboard-visibility`).send({ visible: false });
-    expect((await request(app).get(`/api/share/${token}/leaderboard`)).status).toBe(403);
-    expect((await agent.get(`/api/quizzes/${quizId}/leaderboard`)).status).toBe(200);
-    await agent.patch(`/api/quizzes/${quizId}/leaderboard-visibility`).send({ visible: true });
-    expect((await request(app).get(`/api/share/${token}/leaderboard`)).status).toBe(200);
+    // No examinee-facing route exists at all (token or not).
+    expect((await request(app).get(`/api/share/${token}/leaderboard`)).status).toBe(404);
+    expect((await request(app).get(`/api/quizzes/${quizId}/leaderboard`)).status).toBe(401);
   });
 });
