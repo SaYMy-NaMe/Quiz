@@ -210,3 +210,8 @@ code { font-family: var(--mono); font-size: 0.9em; background: var(--surface-2);
 .gf-add { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin: 0.5rem 0 1rem; }
 .gf-required-dot { color: var(--danger); margin-left: 0.15rem; }
 @media (max-width: 640px) { .gf-field-head { grid-template-columns: 1fr; } }
+
+/* Omnipresent floating timer (Step 2) */
+.timer--floating { position: fixed; right: 16px; bottom: 16px; z-index: 50; box-shadow: var(--shadow); border: 1px solid var(--border); min-width: 140px; text-align: center; }
+.timer__progress { margin-top: 0.35rem; height: 4px; }
+@media (max-width: 640px) { .timer--floating { right: 8px; bottom: 8px; font-size: 1.1rem; } }
