@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import { Link, useLoaderData, useNavigate } from 'react-router-dom';
-import type { ShareLoaderData } from '@/router/share-loader';
+import { Link, useNavigate } from 'react-router-dom';
+import { useShareData } from '@/router/useShareData';
 import { WizardSteps } from '../components/WizardSteps';
 import { McqRenderer } from '../components/McqRenderer';
 import { Timer } from '../components/Timer';
@@ -12,7 +12,7 @@ import { Modal } from '@/components/Modal';
 import { useProctor, ProctorOverlays, createProctor } from '@/modules/proctor';
 
 export function Component() {
-  const { quiz, token, invite } = useLoaderData() as ShareLoaderData;
+  const { quiz, token, invite } = useShareData();
   const navigate = useNavigate();
   // Fullscreen must be requested inside the Start-Quiz gesture; it persists across the attempt.
   const beforeStart = useCallback(async () => {
