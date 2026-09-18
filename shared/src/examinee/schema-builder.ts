@@ -84,7 +84,7 @@ export function validateExaminee(fields: SchemaField[], input: unknown): Examine
   const result = ExamineeSchemaBuilder.fromFields(fields).safeParse(input ?? {});
   if (result.success) {
     const data: ExamineeRecord = {};
-    for (const [k, v] of Object.entries(result.data as Record<string, unknown>)) {
+    for (const [k, v] of Object.entries(result.data)) {
       if (v === undefined || v === '') continue;
       data[k] = v as string | number;
     }
@@ -93,7 +93,7 @@ export function validateExaminee(fields: SchemaField[], input: unknown): Examine
   const errors: Record<string, string> = {};
   for (const issue of result.error.issues) {
     const key = String(issue.path[0] ?? '_');
-    if (!errors[key]) errors[key] = issue.message;
+    errors[key] ??= issue.message;
   }
   return { success: false, errors };
 }

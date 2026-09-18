@@ -43,7 +43,7 @@ export function createSubmissionService({ db, repo, grading, events }: Deps): Su
 
   const loadAttempt = (quiz: Quiz, attemptId: string): Attempt => {
     const attempt = repo.findAttempt(attemptId);
-    if (!attempt || attempt.quizId !== quiz.id) throw notFound('Attempt not found');
+    if (attempt?.quizId !== quiz.id) throw notFound('Attempt not found');
     return attempt;
   };
 

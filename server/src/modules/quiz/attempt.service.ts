@@ -56,7 +56,7 @@ export function createAttemptService(repo: AttemptRepository): AttemptService {
 
     resume({ quiz }, attemptId) {
       const attempt = repo.findAttempt(attemptId);
-      if (!attempt || attempt.quizId !== quiz.id) throw notFound('Attempt not found');
+      if (attempt?.quizId !== quiz.id) throw notFound('Attempt not found');
       return view(quiz, attempt);
     },
   };

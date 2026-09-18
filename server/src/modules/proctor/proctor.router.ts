@@ -3,7 +3,7 @@ import { z } from 'zod';
 import type { ProctorService } from './proctor.service';
 import type { ShareService } from '@/modules/share';
 import { resolveShare } from '@/modules/share';
-import { validateBody } from '@/middleware/validate';
+import { validateBody, bodyOf } from '@/middleware/validate';
 
 const ViolationSchema = z.object({
   inviteToken: z.string().max(64).optional(),
@@ -15,7 +15,7 @@ export function createProctorRouter(share: ShareService, proctor: ProctorService
   const router = Router({ mergeParams: true });
   router.post('/', validateBody(ViolationSchema), resolveShare(share), (req, res) => {
     res.set('Cache-Control', 'no-store');
-    res.json(proctor.record(req.share!, String(req.params['attemptId']), req.body.kind));
+    res.json(proctor.record(req.share!, String(req.params.attemptId), bodyOf(req, ViolationSchema).kind));
   });
   return router;
 }

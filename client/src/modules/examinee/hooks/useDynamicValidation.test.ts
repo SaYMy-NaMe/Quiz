@@ -10,7 +10,7 @@ const fields: SchemaField[] = [
 describe('client dynamic validation', () => {
   it('shares the exact schema semantics with the server', () => {
     expect(validateExaminee(fields, { name: 'x', section: '' }).data).toEqual({ name: 'x' });
-    expect(validateExaminee(fields, { name: '' }).errors['name']).toMatch(/required/);
-    expect(validateExaminee(fields, { name: 'x', section: 'C' }).errors['section']).toBeTruthy();
+    expect(validateExaminee(fields, { name: '' }).errors.name).toMatch(/required/);
+    expect(validateExaminee(fields, { name: 'x', section: 'C' }).errors.section).toBeTruthy();
   });
 });

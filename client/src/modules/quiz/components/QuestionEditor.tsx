@@ -40,15 +40,15 @@ export function QuestionEditor({ question, index, total, errors = {} }: Question
       {question.promptType === 'image' && (
         <ImageUploader value={question.imageUrl} onChange={(imageUrl) => updateQuestion(qk, { imageUrl })} />
       )}
-      {errors['imageUrl'] && <span className="field__error" role="alert">{errors['imageUrl']}</span>}
+      {errors.imageUrl && <span className="field__error" role="alert">{errors.imageUrl}</span>}
 
       <div className="field">
         <label className="field__label" htmlFor={promptId}>
           {question.promptType === 'image' ? 'Caption (optional)' : 'Prompt'}
           {question.promptType === 'text' && <span className="req" aria-hidden="true">*</span>}
         </label>
-        <textarea id={promptId} className="textarea" value={question.prompt} onChange={(e) => updateQuestion(qk, { prompt: e.target.value })} aria-invalid={errors['prompt'] ? 'true' : undefined} />
-        {errors['prompt'] && <span className="field__error" role="alert">{errors['prompt']}</span>}
+        <textarea id={promptId} className="textarea" value={question.prompt} onChange={(e) => updateQuestion(qk, { prompt: e.target.value })} aria-invalid={errors.prompt ? 'true' : undefined} />
+        {errors.prompt && <span className="field__error" role="alert">{errors.prompt}</span>}
       </div>
 
       <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
@@ -75,7 +75,7 @@ export function QuestionEditor({ question, index, total, errors = {} }: Question
             <button type="button" className="btn btn--sm btn--ghost" onClick={() => removeOption(qk, o.key)} disabled={question.options.length <= MIN_OPTIONS} aria-label={`Remove option ${i + 1}`}>✕</button>
           </div>
         ))}
-        {errors['options'] && <span className="field__error" role="alert">{errors['options']}</span>}
+        {errors.options && <span className="field__error" role="alert">{errors.options}</span>}
         <div className="row row--between">
           <button type="button" className="btn btn--sm" onClick={() => addOption(qk)} disabled={question.options.length >= MAX_OPTIONS}>+ Add option</button>
           <label className="row small">

@@ -31,7 +31,7 @@ export interface ProctorOptions {
 }
 
 /** Keyboard shortcuts commonly used to leave or inspect the page. */
-const BLOCKED_SHORTCUTS: Array<(e: KeyboardEvent) => boolean> = [
+const BLOCKED_SHORTCUTS: ((e: KeyboardEvent) => boolean)[] = [
   (e) => e.key === 'F12',
   (e) => e.key === 'F11',
   (e) => (e.ctrlKey || e.metaKey) && ['t', 'n', 'w', 'r', 'p', 's', 'u', 'l', 'h', 'j', 'k'].includes(e.key.toLowerCase()),

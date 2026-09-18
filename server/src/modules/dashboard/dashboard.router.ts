@@ -6,7 +6,7 @@ import { requireInstructor } from '@/modules/auth';
 export function createDashboardRouter(analytics: AnalyticsService): Router {
   const router = Router({ mergeParams: true });
   router.use(requireInstructor);
-  const id = (req: import('express').Request) => String((req.params as Record<string, string>)['id']);
+  const id = (req: import('express').Request) => String((req.params as Record<string, string>).id);
 
   router.get('/analytics', (req, res) => {
     res.json({ analytics: analytics.forQuiz(req.instructor!.id, id(req)) });

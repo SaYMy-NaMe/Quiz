@@ -15,6 +15,8 @@ import { createInstructorLeaderboardRouter, createPublicLeaderboardRouter } from
 import { createReportingRouter } from '@/modules/reporting';
 import { createDashboardRouter } from '@/modules/dashboard';
 import path from 'node:path';
+import fs from 'node:fs';
+import { rateLimit } from '@/middleware/rate-limit';
 
 export function createApp(container: Container): express.Express {
   const app = express();
@@ -33,6 +35,8 @@ export function createApp(container: Container): express.Express {
     res.json({ ok: true, uptime: process.uptime() });
   });
 
+  // Examinee-facing token endpoints get a generous per-IP ceiling against scraping/enumeration.
+  app.use('/api/share', rateLimit({ windowMs: 60 * 1000, max: env.NODE_ENV === 'test' ? 10_000 : 300 }));
   app.use(attachSession(container.auth));
   app.use('/api/auth', createAuthRouter(container.auth));
   app.use('/api/quizzes/:id/invites', createInviteRouter(container.share));
@@ -54,5 +58,18 @@ export function createApp(container: Container): express.Express {
     res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Not found' } });
   });
   app.use(errorHandler);
+
+  // Modular monolith: in production the built client is served from the same process with an
+  // SPA fallback so tokenized links (/quiz/v/:token) resolve client-side.
+  const dist = env.CLIENT_DIST ? path.resolve(env.CLIENT_DIST) : '';
+  if (env.NODE_ENV === 'production' && dist && fs.existsSync(path.join(dist, 'index.html'))) {
+    app.use(express.static(dist, { index: false, maxAge: '1y', immutable: true, setHeaders: (res, file) => {
+      if (file.endsWith('index.html')) res.setHeader('Cache-Control', 'no-cache');
+    } }));
+    app.get(/^(?!\/api|\/uploads).*/, (_req, res) => {
+      res.setHeader('Cache-Control', 'no-cache');
+      res.sendFile(path.join(dist, 'index.html'));
+    });
+  }
   return app;
 }

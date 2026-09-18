@@ -27,17 +27,20 @@ export function QuizEditor() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
+  const load = useEditorStore((s) => s.load);
+  const reset = useEditorStore((s) => s.reset);
+
   useEffect(() => {
     let cancelled = false;
     if (!id) {
-      store.reset();
+      reset();
       setLoading(false);
       return;
     }
     void quizApi
       .get(id)
       .then(({ quiz }) => {
-        if (!cancelled) store.load(quiz);
+        if (!cancelled) load(quiz);
       })
       .catch(() => navigate('/dashboard', { replace: true }))
       .finally(() => {
@@ -46,8 +49,7 @@ export function QuizEditor() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, load, reset, navigate]);
 
   useEffect(() => {
     if (!dirty) return;
@@ -61,9 +63,9 @@ export function QuizEditor() {
   const readOnly = status !== 'draft';
   const tabErrors = useMemo(
     () => ({
-      questions: Object.keys(errors.questions).length > 0 || Boolean(errors.form['questions']),
+      questions: Object.keys(errors.questions).length > 0 || Boolean(errors.form.questions),
       examinee: Object.keys(errors.fields).length > 0,
-      settings: Boolean(errors.form['durationSeconds']),
+      settings: Boolean(errors.form.durationSeconds),
     }),
     [errors],
   );
@@ -127,8 +129,8 @@ export function QuizEditor() {
             <div className="form-grid">
               <div className="field">
                 <label className="field__label" htmlFor="title">Title<span className="req" aria-hidden="true">*</span></label>
-                <input id="title" className="input" value={draft.title} onChange={(e) => store.setMeta({ title: e.target.value })} aria-invalid={errors.form['title'] ? 'true' : undefined} />
-                {errors.form['title'] && <span className="field__error" role="alert">{errors.form['title']}</span>}
+                <input id="title" className="input" value={draft.title} onChange={(e) => store.setMeta({ title: e.target.value })} aria-invalid={errors.form.title ? 'true' : undefined} />
+                {errors.form.title && <span className="field__error" role="alert">{errors.form.title}</span>}
               </div>
               <div className="field">
                 <label className="field__label" htmlFor="description">Description</label>
@@ -154,7 +156,7 @@ export function QuizEditor() {
 
           {tab === 'questions' && (
             <div className="stack">
-              {errors.form['questions'] && <div className="alert alert--error">{errors.form['questions']}</div>}
+              {errors.form.questions && <div className="alert alert--error">{errors.form.questions}</div>}
               {draft.questions.map((q, i) => (
                 <QuestionEditor key={q.key} question={q} index={i} total={draft.questions.length} errors={errors.questions[q.key] ?? {}} />
               ))}

@@ -28,7 +28,7 @@ describe('submission pipeline', () => {
   let app: ReturnType<typeof createApp>;
   let agent: ReturnType<typeof request.agent>;
   let token: string;
-  let questions: Array<{ id: string; options: Array<{ id: string }> }>;
+  let questions: { id: string; options: { id: string }[] }[];
   let correctIds: string[];
 
   const payload = (revealAnswers: boolean) => ({

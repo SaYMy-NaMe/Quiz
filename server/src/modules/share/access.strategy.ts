@@ -35,7 +35,7 @@ export class RestrictedAccessStrategy implements AccessStrategy {
   authorize({ quiz, inviteToken }: AccessContext): AccessDecision {
     if (!inviteToken) return { allowed: false, reason: 'no_invite' };
     const invite = this.invites.findByToken(inviteToken);
-    if (!invite || invite.quizId !== quiz.id) return { allowed: false, reason: 'invalid_invite' };
+    if (invite?.quizId !== quiz.id) return { allowed: false, reason: 'invalid_invite' };
     return { allowed: true, lockedEmail: invite.email };
   }
 }

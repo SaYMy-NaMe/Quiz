@@ -15,7 +15,6 @@ const resultPath = (token: string, invite: string | null) => `/quiz/v/${token}/r
 export function Component() {
   const { quiz, token, invite } = useLoaderData() as ShareLoaderData;
   const navigate = useNavigate();
-  const hydrate = useAttemptStore((s) => s.hydrate);
   const begin = useAttemptStore((s) => s.begin);
   const [busy, setBusy] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -23,10 +22,10 @@ export function Component() {
 
   // Resume an in-flight attempt (or show the receipt) after refresh / navigation.
   useEffect(() => {
-    const persisted = hydrate(token);
-    if (!persisted || persisted.quizId !== quiz.id) return;
+    const persisted = useAttemptStore.getState().hydrate(token);
+    if (persisted?.quizId !== quiz.id) return;
     navigate(persisted.receipt ? resultPath(token, invite) : testPath(token, invite), { replace: true });
-  }, [hydrate, navigate, quiz.id, token, invite]);
+  }, [navigate, quiz.id, token, invite]);
 
   const start = async (examinee: ExamineeRecord) => {
     setBusy(true);

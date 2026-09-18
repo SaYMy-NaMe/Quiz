@@ -8,7 +8,7 @@ const TYPE_LABELS: Record<DraftSchemaField['type'], string> = {
   select: 'Dropdown',
 };
 
-const PRESETS: Array<Omit<DraftSchemaField, 'key'>> = [
+const PRESETS: Omit<DraftSchemaField, 'key'>[] = [
   { fieldId: 'name', label: 'Full name', type: 'text', required: true, options: [], placeholder: 'Jane Doe' },
   { fieldId: 'student_id', label: 'Student ID', type: 'text', required: true, options: [], placeholder: '' },
   { fieldId: 'email', label: 'Email', type: 'email', required: true, options: [], placeholder: 'you@school.edu' },
@@ -94,15 +94,15 @@ export function ExamineeSchemaBuilder({ errors }: Props) {
                     const autoId = !f.fieldId || f.fieldId === slugify(f.label);
                     updateField(f.key, { label, ...(autoId ? { fieldId: slugify(label) } : {}) });
                   }}
-                  aria-invalid={e['label'] ? 'true' : undefined}
+                  aria-invalid={e.label ? 'true' : undefined}
                 />
-                {e['label'] && <span className="field__error" role="alert">{e['label']}</span>}
+                {e.label && <span className="field__error" role="alert">{e.label}</span>}
               </div>
               <div className="field">
                 <label className="field__label" htmlFor={`${f.key}-id`}>Field id</label>
-                <input id={`${f.key}-id`} className="input mono" value={f.fieldId} onChange={(ev) => updateField(f.key, { fieldId: ev.target.value })} aria-invalid={e['fieldId'] ? 'true' : undefined} />
+                <input id={`${f.key}-id`} className="input mono" value={f.fieldId} onChange={(ev) => updateField(f.key, { fieldId: ev.target.value })} aria-invalid={e.fieldId ? 'true' : undefined} />
                 <span className="field__hint">Column key in exports</span>
-                {e['fieldId'] && <span className="field__error" role="alert">{e['fieldId']}</span>}
+                {e.fieldId && <span className="field__error" role="alert">{e.fieldId}</span>}
               </div>
               <div className="field">
                 <label className="field__label" htmlFor={`${f.key}-type`}>Type</label>
@@ -126,9 +126,9 @@ export function ExamineeSchemaBuilder({ errors }: Props) {
                   className="textarea"
                   value={f.options.join('\n')}
                   onChange={(ev) => updateField(f.key, { options: ev.target.value.split('\n') })}
-                  aria-invalid={e['options'] ? 'true' : undefined}
+                  aria-invalid={e.options ? 'true' : undefined}
                 />
-                {e['options'] && <span className="field__error" role="alert">{e['options']}</span>}
+                {e.options && <span className="field__error" role="alert">{e.options}</span>}
               </div>
             )}
 

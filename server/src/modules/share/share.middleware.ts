@@ -16,8 +16,8 @@ declare global {
 export function resolveShare(share: ShareService): RequestHandler {
   return (req, _res, next) => {
     try {
-      const token = String(req.params['token'] ?? '');
-      const query = req.query['invite'];
+      const token = req.params.token ?? '';
+      const query = req.query.invite;
       const body = (req.body as { inviteToken?: unknown } | undefined)?.inviteToken;
       const invite = typeof query === 'string' ? query : typeof body === 'string' ? body : undefined;
       req.share = share.resolve(token, invite);

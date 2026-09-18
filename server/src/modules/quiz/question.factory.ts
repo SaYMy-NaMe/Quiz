@@ -25,7 +25,7 @@ export interface QuestionInput {
  * so ids are always assigned and the answer key always references a real option.
  */
 export const OptionFactory = {
-  create(input: OptionInput): QuestionOption {
+  create: (input: OptionInput): QuestionOption => {
     const text = input.text.trim();
     if (!text) throw badRequest('Option text cannot be empty');
     return { id: input.id ?? newId(), text };
@@ -33,7 +33,7 @@ export const OptionFactory = {
 };
 
 export const QuestionFactory = {
-  create(input: QuestionInput): Question {
+  create: (input: QuestionInput): Question => {
     if (input.options.length < MIN_OPTIONS || input.options.length > MAX_OPTIONS) {
       throw badRequest(`Questions must have between ${MIN_OPTIONS} and ${MAX_OPTIONS} options`);
     }
@@ -65,7 +65,7 @@ export const QuestionFactory = {
     return question;
   },
 
-  createMany(inputs: QuestionInput[]): Question[] {
+  createMany: (inputs: QuestionInput[]): Question[] => {
     const questions = inputs.map((q) => QuestionFactory.create(q));
     const ids = new Set(questions.map((q) => q.id));
     if (ids.size !== questions.length) throw badRequest('Question ids must be unique');

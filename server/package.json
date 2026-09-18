@@ -9,7 +9,7 @@
     "start": "NODE_ENV=production NODE_OPTIONS=--no-warnings=ExperimentalWarning tsx src/index.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

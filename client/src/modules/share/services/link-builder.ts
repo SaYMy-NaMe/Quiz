@@ -18,6 +18,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     el.style.opacity = '0';
     document.body.appendChild(el);
     el.select();
+    // eslint-disable-next-line @typescript-eslint/no-deprecated -- intentional legacy fallback
     const ok = document.execCommand('copy');
     document.body.removeChild(el);
     return ok;

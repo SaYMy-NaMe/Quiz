@@ -106,7 +106,7 @@ export function createAttemptRepository(db: Db): AttemptRepository {
     },
     countSubmissions(quizId) {
       const row = db.prepare('SELECT COUNT(*) AS n FROM submissions WHERE quiz_id = ?').get(quizId) as { n: number };
-      return Number(row.n);
+      return row.n;
     },
   };
 }
