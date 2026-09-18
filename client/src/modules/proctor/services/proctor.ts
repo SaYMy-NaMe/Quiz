@@ -30,7 +30,12 @@ export interface ProctorOptions {
   win?: Window;
 }
 
-/** Keyboard shortcuts commonly used to leave or inspect the page. */
+/**
+ * Keyboard shortcuts commonly used to leave or inspect the page.
+ * Note: OS-level switches (Alt+Tab / Cmd+Tab) cannot be cancelled by any web page — they are
+ * caught *after the fact* through the `blur` / `visibilitychange` observers below and counted
+ * as hard violations. Everything listed here is cancellable and blocked outright.
+ */
 const BLOCKED_SHORTCUTS: ((e: KeyboardEvent) => boolean)[] = [
   (e) => e.key === 'F12',
   (e) => e.key === 'F11',
@@ -77,6 +82,10 @@ export function createProctor({ cooldownMs = 1500, target = document, win = wind
     publish('contextmenu', true);
   };
   const onCopy = (e: Event) => e.preventDefault();
+  // Leaving the page mid-exam (close tab / navigate away) gets a native confirmation prompt.
+  const onBeforeUnload = (e: BeforeUnloadEvent) => {
+    e.preventDefault();
+  };
 
   return {
     subscribe(listener) {
@@ -93,6 +102,7 @@ export function createProctor({ cooldownMs = 1500, target = document, win = wind
       target.addEventListener('contextmenu', onContextMenu, true);
       target.addEventListener('copy', onCopy, true);
       target.addEventListener('cut', onCopy, true);
+      win.addEventListener('beforeunload', onBeforeUnload);
     },
     disarm() {
       if (!armed) return;
@@ -104,6 +114,7 @@ export function createProctor({ cooldownMs = 1500, target = document, win = wind
       target.removeEventListener('contextmenu', onContextMenu, true);
       target.removeEventListener('copy', onCopy, true);
       target.removeEventListener('cut', onCopy, true);
+      win.removeEventListener('beforeunload', onBeforeUnload);
     },
     isFullscreen: () => Boolean(target.fullscreenElement),
     async requestFullscreen() {
