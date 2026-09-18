@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import { RootLayout } from '@/components/RootLayout';
 import { NotFoundPage } from '@/components/NotFoundPage';
 import { RequireAuth, RedirectIfAuthenticated } from '@/modules/auth';
+import { shareLoader } from './share-loader';
 
 /** Routes are lazily loaded so the examinee path never ships instructor code. */
 export const router = createBrowserRouter([
@@ -37,6 +38,12 @@ export const router = createBrowserRouter([
             lazy: () => import('@/modules/quiz/pages').then((m) => ({ Component: m.QuizEditorPage })),
           },
         ],
+      },
+      {
+        path: 'quiz/v/:token',
+        loader: shareLoader,
+        errorElement: <NotFoundPage />,
+        lazy: () => import('@/modules/examinee/pages/QuizEntryPage'),
       },
       { path: '*', element: <NotFoundPage /> },
     ],
