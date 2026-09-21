@@ -10,3 +10,5 @@ coverage/
 * 2*
 * 3*
 * 4*
+# embedded dev database (MONGODB_URI=local)
+data/

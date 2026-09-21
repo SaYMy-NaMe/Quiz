@@ -10,6 +10,7 @@ import { z } from 'zod';
 const EnvSchema = z.object({
   PORT: z.coerce.number().int().positive().default(4000),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  /** Atlas connection string, or the literal `local` for an embedded dev database. */
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters'),
   CLIENT_ORIGIN: z.string().default('http://localhost:5173'),

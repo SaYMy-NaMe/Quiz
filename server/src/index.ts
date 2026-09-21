@@ -2,10 +2,12 @@ import { createApp } from '@/app';
 import { env } from '@/config/env';
 import { logger } from '@/services/logger';
 import { connectDatabase, disconnectDatabase } from '@/db/mongoose';
+import { startLocalMongo } from '@/db/local-mongo';
 
 async function main(): Promise<void> {
   // The API is useless without its database, so a failed connection is fatal — but loud and specific.
-  await connectDatabase(env.MONGODB_URI);
+  const uri = env.MONGODB_URI === 'local' ? await startLocalMongo() : env.MONGODB_URI;
+  await connectDatabase(uri);
   const server = createApp().listen(env.PORT, () => logger.info({ port: env.PORT, env: env.NODE_ENV, clientOrigin: env.CLIENT_ORIGIN }, 'Quiz server listening'));
 
   const shutdown = () => {

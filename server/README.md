@@ -37,7 +37,8 @@ error is a misleading `tlsv1 alert internal error`). While the API is down the c
 
 | Script | What it does |
 |---|---|
-| `npm run dev` | tsx watch with auto-reload |
+| `npm run dev` | tsx watch with auto-reload (Atlas) |
+| `npm run dev:local` | same, but on an embedded local MongoDB persisted in `data/mongo` — use when Atlas is unreachable |
 | `npm start` | production mode |
 | `npm test` | vitest on `mongodb-memory-server` (no Atlas needed) |
 | `npm run typecheck` / `npm run lint` | strict TS / type-aware ESLint |

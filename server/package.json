@@ -14,7 +14,8 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:reset": "prisma migrate reset --force",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "dev:local": "MONGODB_URI=local NODE_OPTIONS=--no-warnings tsx watch --clear-screen=false src/index.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
