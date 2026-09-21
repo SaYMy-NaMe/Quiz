@@ -1,0 +1,8 @@
+node_modules/
+# single environment file — holds the Atlas credentials, never commit it
+.env
+uploads/
+dist/
+coverage/
+*.log
+.DS_Store
