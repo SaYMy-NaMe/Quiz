@@ -10,16 +10,15 @@
     "types": [
       "vite/client"
     ],
-    "baseUrl": ".",
     "paths": {
       "@shared/*": [
-        "src/shared/*"
+        "./src/shared/*"
       ],
       "@shared": [
-        "src/shared/index.ts"
+        "./src/shared/index.ts"
       ],
       "@/*": [
-        "src/*"
+        "./src/*"
       ]
     },
     "noEmit": true
