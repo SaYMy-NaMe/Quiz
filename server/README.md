@@ -28,8 +28,10 @@ CLIENT_ORIGIN=http://localhost:5173
 `src/config/env.ts`): `CLIENT_ORIGINS` (comma-separated extra CORS origins, `https://*.vercel.app`
 wildcards allowed), `UPLOAD_DIR`, `CLIENT_DIST`.
 
-**Atlas checklist:** add your machine's / host's IP to the cluster's *Network Access* list —
-otherwise the driver reports "Could not connect to any servers in your MongoDB Atlas cluster".
+**Atlas checklist:** add your machine's / host's IP to the cluster's *Network Access* list.
+If it is missing, the server refuses to start and prints exactly that diagnosis (the raw driver
+error is a misleading `tlsv1 alert internal error`). While the API is down the client shows
+"Cannot reach the server at http://localhost:4000".
 
 ### Scripts
 

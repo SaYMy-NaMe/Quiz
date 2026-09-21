@@ -28,3 +28,17 @@ describe('auth (JWT)', () => {
     expect((await agent.get('/api/auth/me')).status).toBe(401);
   });
 });
+
+describe('auth error surfacing', () => {
+  it('maps a unique-index race on email to 409 and malformed JSON to 400', async () => {
+    const { UserModel } = await import('./user.model');
+    await UserModel.create({ email: 'dup@x.io', name: 'A', passwordHash: 'x' });
+    // Bypass the pre-check to simulate two concurrent registrations hitting the unique index.
+    await expect(UserModel.create({ email: 'dup@x.io', name: 'B', passwordHash: 'y' })).rejects.toMatchObject({ code: 11000 });
+    const res = await request(app).post('/api/auth/register').send({ name: 'B', email: 'dup@x.io', password: 'password123' });
+    expect(res.status).toBe(409);
+    const bad = await request(app).post('/api/auth/register').set('Content-Type', 'application/json').send('{not json');
+    expect(bad.status).toBe(400);
+    expect(bad.body.error.message).toMatch(/Malformed JSON/);
+  });
+});

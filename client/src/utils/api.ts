@@ -3,7 +3,7 @@
  * non-JSON responses such as file downloads), so the base URL, credentials policy, error
  * shape and session-expiry handling live in exactly one place.
  */
-import { BASE_URL } from './baseURL';
+import { BASE_URL, SERVER_ORIGIN } from './baseURL';
 
 export class HttpError extends Error {
   constructor(
@@ -48,8 +48,14 @@ export const apiUrl = (path: string): string => `${BASE_URL}${path.startsWith('/
  * Raw fetch against the API with the credentials policy applied. Use it when you need the
  * Response itself (blobs, streams); prefer `api.*` for JSON.
  */
-export function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
-  return fetch(apiUrl(path), { credentials: 'include', ...init });
+export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  try {
+    return await fetch(apiUrl(path), { credentials: 'include', ...init });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') throw err;
+    // fetch only rejects when no HTTP response arrived: server down, wrong BASE_URL, CORS block.
+    throw new HttpError(0, 'NETWORK_ERROR', `Cannot reach the server at ${SERVER_ORIGIN}. Make sure it is running (cd server && npm run dev) and that BASE_URL in src/utils/baseURL.ts points at it.`, err);
+  }
 }
 
 /** Extracts the API's `{ error: { code, message, details } }` envelope into an HttpError. */
@@ -77,7 +83,12 @@ async function request<T>(method: Method, path: string, { body, signal }: Reques
   if (res.status === 204) return undefined as T;
 
   const text = await res.text();
-  const data: unknown = text ? JSON.parse(text) : null;
+  let data: unknown = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    throw new HttpError(res.status, 'BAD_RESPONSE', `The server at ${SERVER_ORIGIN} returned a non-JSON response (${res.status}). Is BASE_URL pointing at the API?`);
+  }
 
   if (!res.ok) {
     const err = (data as ErrorBody | null)?.error;

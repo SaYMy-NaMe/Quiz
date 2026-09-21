@@ -4,8 +4,9 @@ import { logger } from '@/services/logger';
 import { connectDatabase, disconnectDatabase } from '@/db/mongoose';
 
 async function main(): Promise<void> {
+  // The API is useless without its database, so a failed connection is fatal — but loud and specific.
   await connectDatabase(env.MONGODB_URI);
-  const server = createApp().listen(env.PORT, () => logger.info({ port: env.PORT, env: env.NODE_ENV }, 'Quiz server listening'));
+  const server = createApp().listen(env.PORT, () => logger.info({ port: env.PORT, env: env.NODE_ENV, clientOrigin: env.CLIENT_ORIGIN }, 'Quiz server listening'));
 
   const shutdown = () => {
     logger.info('Shutting down');
@@ -16,6 +17,9 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-  logger.error({ err }, 'Fatal startup error');
+  const message = err instanceof Error ? err.message : String(err);
+  logger.error({ cause: err instanceof Error && err.cause instanceof Error ? err.cause.message : undefined }, `Fatal startup error: ${message}`);
+  // Plain stderr copy so the diagnosis is readable even without a pino pretty-printer.
+  console.error(`\n✖ Server did not start.\n${message}\n`);
   process.exit(1);
 });

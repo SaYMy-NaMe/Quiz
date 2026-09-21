@@ -22,3 +22,16 @@ describe('auth store session guard', () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe('network failures are explained, not generic', () => {
+  it('turns a rejected fetch into a NETWORK_ERROR HttpError naming the server', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new TypeError('Failed to fetch'))));
+    await expect(api.post('/auth/login', {})).rejects.toMatchObject({ status: 0, code: 'NETWORK_ERROR', message: expect.stringContaining('localhost:4000') });
+    vi.unstubAllGlobals();
+  });
+  it('flags a non-JSON response (wrong BASE_URL) instead of throwing a parse error', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response('<!doctype html>', { status: 200 }))));
+    await expect(api.get('/auth/me')).rejects.toMatchObject({ code: 'BAD_RESPONSE' });
+    vi.unstubAllGlobals();
+  });
+});

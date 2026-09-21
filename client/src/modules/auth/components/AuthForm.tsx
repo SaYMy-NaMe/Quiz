@@ -54,7 +54,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       else await login(parsed.data);
       navigate(from, { replace: true });
     } catch (err) {
-      setFormError(err instanceof HttpError ? err.message : 'Something went wrong. Please try again.');
+      setFormError(err instanceof HttpError ? err.message : `Unexpected error: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setBusy(false);
     }
