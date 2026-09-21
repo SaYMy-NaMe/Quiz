@@ -1,14 +1,33 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node"],
-    "lib": ["ES2022"],
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "ES2022"
+    ],
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["src/shared/*"],
-      "@shared": ["src/shared/index.ts"],
-      "@/*": ["src/*"]
+      "@shared/*": [
+        "src/shared/*"
+      ],
+      "@shared": [
+        "src/shared/index.ts"
+      ],
+      "@/*": [
+        "src/*"
+      ]
     }
   },
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/* 2*",
+    "**/* 3*",
+    "**/* 4*"
+  ]
 }

@@ -4,7 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['dist/**', 'node_modules/**', 'eslint.config.js', 'vite.config.ts'] },
+  { ignores: ['**/* 2*', '**/* 3*', '**/* 4*', 'dist/**', 'node_modules/**', 'eslint.config.js', 'vite.config.ts'] },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,

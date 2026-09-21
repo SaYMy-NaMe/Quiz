@@ -3,3 +3,7 @@ dist/
 coverage/
 *.log
 .DS_Store
+# iCloud Desktop sync conflict copies
+* 2*
+* 3*
+* 4*
