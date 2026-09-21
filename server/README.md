@@ -42,6 +42,7 @@ error is a misleading `tlsv1 alert internal error`). While the API is down the c
 | `npm start` | production mode |
 | `npm test` | vitest on `mongodb-memory-server` (no Atlas needed) |
 | `npm run typecheck` / `npm run lint` | strict TS / type-aware ESLint |
+| `npm run db:check` | connect to MONGODB_URI and list collections — run this first when the client says it cannot reach the server |
 
 ## Data model (Mongoose)
 
